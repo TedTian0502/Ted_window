@@ -58,11 +58,42 @@ I read this interesting quote the other day:
 * Cheese
 * omatoes
 
-1. 打三顆蛋
-2. 倒一加侖的牛奶到碗裡
-3. 用力地將奶油抹在鮭魚上
-4. 將鮭魚放進這碗蛋液及牛奶的混和液體裡
+5. Cut the cheese
+6. Slice the tomatoes
+7. Rub the tomatoes in flour
 
+* Azalea (_Ericaceae Rhododendron_)
+* Chrysanthemum (_Anthemideae Chrysanthemum_)
+* Dahlia (_Coreopsideae Dahlia_)
 
+* Calculus
+    * A professor
+    * Has no hair
+    * Often wears green
+* Castafiore
+    * An opera singer
+    * Has white hair
+    * Is possibly mentally unwell
+
+1. Cut the cheese
+
+    Make sure that the cheese is cut into little triangles.
+
+2. Slice the tomatoes
+
+    Be careful when holding the knife.
+ 
+    For more help on tomato slicing, see Thomas Jefferson's seminal essay _Tom Ate Those_.
 ## 第7堂課
-## 第8堂課
+We pictured the meek mild creatures where  
+They dwelt in their strawy pen,  
+Nor did it occur to one of us there  
+To doubt they were kneeling then.
+
+1. Crack three eggs over a bowl.  
+Now, you're going to want to crack the eggs in such a way that you don't make a mess.  
+If you _do_ make a mess, use a towel to clean it up!
+
+2. Pour a gallon of milk into the bowl.  
+Basically, take the same guidance as above: don't be messy, but if you are, clean it up!
+

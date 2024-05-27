@@ -12,4 +12,4 @@ with open ("aqi.json", 'wb') as fd:
     for chunk in res.iter_content(chunk_size=128):
         fd.write(chunk)
 
-##### [田恭豪_0520_issue6.](https://github.com/TedTian0502/Ted_window/blob/main/%E9%A1%9E%E5%88%A5/HW/0520.ipynb)
+##### [田恭豪_0520_issue6.](https://github.com/TedTian0502/Ted_window/blob/main/%E9%A1%9E%E5%88%A5/HW/issue6/0520.ipynb)

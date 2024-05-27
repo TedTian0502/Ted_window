@@ -59,3 +59,5 @@ dict實體
 mapping資料
 
 
+value in sequence(value)
+         mapping(key)

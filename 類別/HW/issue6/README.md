@@ -1,4 +1,4 @@
-## 1.
+## 1.請將以下網址的json,儲存為aqi.json檔 #6
 import requests
 from requests import Response
 

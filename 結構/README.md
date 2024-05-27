@@ -48,3 +48,14 @@ try:
 except Exception:
 ->解決錯誤
 
+
+
+## dict
+{key:value,key:value}
+
+d1:dict
+dict實體
+
+mapping資料
+
+

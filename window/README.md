@@ -23,3 +23,7 @@ Graphical: 圖形介面
 User 
 Interface
 
+## class tk.Tk
+def init(self,xxx,xxx,xxx,xxx)
+
+## class window

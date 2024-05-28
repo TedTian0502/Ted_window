@@ -34,14 +34,14 @@ l1.實體方法
 
 實體名稱[index]:subscript
 
-
+```
 print(l1[0],end=' ')
 print(l1[1],end=' ')
 print(l1[2],end=' ')
 print(l1[3],end=' ')
 print(l1[4])
 print(l1[5])
-
+```
 結果: IndexError
 
 遇到閃退(raise IndexError):
@@ -74,5 +74,3 @@ random module功能提供:
 for&while:
 當迭代次數已知，也就是當你知道要跑幾次迴圈時，可使用for迴圈；而當只知道迴圈執行條件，而不清楚總共需跑幾次迴圈時，就只能使用While迴圈。
 
-文字內容不會顯示換行
-如果使用print(): 將文字內容換行顯示在螢幕上

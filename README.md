@@ -14,8 +14,3 @@
 
 [markdown語法練習](./markdown練習/README.md)
 
-## open
-open()至少需要一個變數
-
-
-如果沒有使用 with as ，則應呼叫 f.close() 關閉檔案

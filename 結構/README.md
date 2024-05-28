@@ -4,8 +4,10 @@ l1 = [2, 4, 6, 8, 10]
 index ---->序列,串列(sequence) --interable
 [2, 4, 6, 8, 10]
 
+屬性:
 attribute
 property
+
 method(實體的方法)
 
 #回傳一個列舉 (enumerate) 物件。iterable 必須是一個序列
@@ -61,3 +63,11 @@ mapping資料
 
 value in sequence(value)
          mapping(key)
+
+
+##　set
+set() 沒有順序且不重複的集合
+
+random module功能提供:
+常數、class、function
+

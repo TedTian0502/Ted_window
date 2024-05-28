@@ -27,3 +27,11 @@ Interface
 def init(self,xxx,xxx,xxx,xxx)
 
 ## class window
+ttk.Label(self,text="Hello World!!",
+            font=('Arial',20,'bold'), #字型設定，包含字體、大小 ( px )、粗體 ( bold )、斜體 ( italic )。
+            foreground = '#f00') #文字顏色
+
+padx:左右邊界距離，預設為1
+pady:上下邊界距離，預設為1
+
+if __name__ == '__main__': 檢查程式是否正在以主程式的方式執行

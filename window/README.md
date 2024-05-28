@@ -36,4 +36,7 @@ pady:上下邊界距離，預設為1
 
 if __name__ == '__main__': 檢查程式是否正在以主程式的方式執行
 
+## window_layout
 self.geometry('300x200'):更改視窗大小
+
+file='x': 填滿範圍的'平行'空間

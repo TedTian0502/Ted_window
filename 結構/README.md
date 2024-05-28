@@ -6,9 +6,9 @@ index ---->序列,串列(sequence) --interable
 
 屬性:
 attribute
-property
+property(儲存值)
 
-method(實體的方法)
+method #實體的方法,後面加'()'
 
 #回傳一個列舉 (enumerate) 物件。iterable 必須是一個序列
 for item in enumerate(l1):
@@ -71,3 +71,8 @@ set() 沒有順序且不重複的集合
 random module功能提供:
 常數、class、function
 
+for&while:
+當迭代次數已知，也就是當你知道要跑幾次迴圈時，可使用for迴圈；而當只知道迴圈執行條件，而不清楚總共需跑幾次迴圈時，就只能使用While迴圈。
+
+文字內容不會顯示換行
+如果使用print(): 將文字內容換行顯示在螢幕上

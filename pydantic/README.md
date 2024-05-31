@@ -2,6 +2,7 @@
 ### pydantic
 
 用來驗證資料，確認資料安全性與完整性
+
 在Pydantic中，當創建了一個模型並對其進行了驗證後，可以使用dict() 方法將該模型轉換為 Python 字典結構。
 
 ### requirements.txt

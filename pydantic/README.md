@@ -13,3 +13,6 @@ pip install -r requirements.txt
 
 
 json檔轉成python的資料結構(list,dictionary)
+
+## unit_price的字串,自動轉換為int失敗.需要手動轉換,raise
+字串為整數(15)可以，如果為(15.5)會失敗

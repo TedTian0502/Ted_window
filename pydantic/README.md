@@ -26,4 +26,4 @@ json檔轉成python的資料結構(list,dictionary)
 
 字串一樣不需用alias
 
-自訂驗證
+自訂驗證 mode='before'

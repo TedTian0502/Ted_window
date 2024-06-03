@@ -15,3 +15,7 @@
 [markdown語法練習](./markdown練習/README.md)
 
 家裡筆電登入
+
+更新完動作
+git fetch
+git pull(檔案抓下來)

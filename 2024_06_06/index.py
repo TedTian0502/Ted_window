@@ -43,8 +43,7 @@ class Window(ThemedTk):
 
     # def click1(self):
     #     print("click1")
-
-    def click1(self):
+    def update_data(self):
         if(tools.AQI.aqi_records is None) or (tools.AQI.update_time is None):
             tools.AQI.aqi_records = self.download_parse_data()
             tools.AQI.update_time = datetime.now()
@@ -53,7 +52,8 @@ class Window(ThemedTk):
             tools.AQI.aqi_records = self.download_parse_data()
             tools.AQI.update_time = datetime.now()
 
-
+    def click1(self):
+        self.update_data()
         data:list[dict] = tools.AQI.aqi_records
         sorted_data:list[dict] = sorted(data,key=lambda value:value['aqi'])
         best_aqi:list[dict] = sorted_data[:5]

@@ -2,6 +2,7 @@ import requests
 from  requests import JSONDecodeError
 from pprint import pprint
 from pydantic import BaseModel,RootModel,Field,field_validator
+from datetime import datetime
 
 class Site(BaseModel):
     site_name:str = Field(alias='sitename')
@@ -38,8 +39,15 @@ def download_json()->dict[any]:
         else:
             raise Exception("下載狀態碼不是200")
         
-def get_data(all_data):
+def get_data(all_data:dict[any])->list[dict]:
     records:Records = Records.model_validate(all_data['records'])
     data = records.model_dump()
-
     return data
+
+class AQI(object):
+    '''
+    利用class atribute aqi_records儲存下載資料
+    利用class atribute update_time儲存下載時間
+    '''
+    aqi_records:list[dict] | None = None
+    update_time:datetime | None = None

@@ -57,7 +57,7 @@ class Window(ThemedTk):
         sorted_data:list[dict] = sorted(data,key=lambda value:value['aqi'])
         best_aqi:list[dict] = sorted_data[:5]
         print(best_aqi)
-          
+
 
     # def click1(self):
     #     print("click1")
@@ -83,9 +83,6 @@ class ShowInfo(Dialog):
         return None
 
 def main():
-    '''
-    
-    '''
     window = Window(theme="itft1")
     window.mainloop()
     

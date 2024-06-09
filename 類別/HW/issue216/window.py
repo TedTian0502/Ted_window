@@ -24,7 +24,7 @@ def calculate_bmi(username, height, weight, result_label):
         # Popup window to display result
         popup = tk.Toplevel()
         popup.title("BMI計算結果")
-        popup.geometry("250x150")
+        popup.geometry("220x150")
         result_text = f"姓名: {username_value}\nBMI: {bmi:.2f}\n狀態: {status}\n建議: {suggestion}"
         result_label_popup = ttk.Label(popup, text=result_text)
         result_label_popup.pack(padx=10, pady=10)
@@ -35,7 +35,7 @@ def calculate_bmi(username, height, weight, result_label):
 def main():
     root = tk.Tk()
     root.title('BMI計算器')
-    root.geometry("240x150")
+    root.geometry("220x150")
     root.resizable(0, 0)
     root.configure(background='#DAD3BE')  # 設置背景色
 

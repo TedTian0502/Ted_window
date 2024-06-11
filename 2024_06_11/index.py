@@ -47,6 +47,7 @@ class Window(ThemedTk):
         entry_weight = ttk.Entry(input_frame,textvariable=self.weight_value)
         entry_weight.grid(row=2, column=1, padx=5, pady=5)    
 
+        #視窗介面內部大小
         input_frame.pack(pady=10,padx=30)
         #===================================
 

@@ -10,7 +10,7 @@ def calculate_bmi(username, height, weight, result_label):
         username_value = username.get()
         result_label.config(text=f"{username_value} 的BMI為: {bmi:.2f}")
         
-        # Check if weight is normal or not
+        # BMI計算公式
         if bmi < 18.5:
             status = "過輕"
             suggestion = f"建議增重 {18.5*(height_value/100)**2 - weight_value:.2f} 公斤"

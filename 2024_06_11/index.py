@@ -6,11 +6,11 @@ from tools import CustomMessagebox
 
 class Window(ThemedTk):
     def __init__(self,theme:str|None,**kwargs):
-        super().__init__(**kwargs) #呼叫 init
-        self.title("BMI計算器")           
-        #self.configure(bg="#D3D3D3")    # 改變背景顏色大小
-        #self.geometry("350x350+100+50") # 設置窗口初始
-        self.resizable(False,False)      # 允許窗口大小可調
+        super().__init__(**kwargs)
+        self.title("BMI計算器")
+        #self.configure(bg="#D3D3D3")
+        #self.geometry("350x350+100+50")
+        self.resizable(False,False)
         style = ttk.Style()
         style.configure('input.TFrame',background='#ffffff')
         style.configure('press.TButton',font=('arial',10))
@@ -47,13 +47,17 @@ class Window(ThemedTk):
         entry_weight = ttk.Entry(input_frame,textvariable=self.weight_value)
         entry_weight.grid(row=2, column=1, padx=5, pady=5)    
 
-        #視窗介面內部大小
         input_frame.pack(pady=10,padx=30)
         #===================================
+        button_frame = ttk.Frame(self)
+        button_calculate = ttk.Button(button_frame, text="計算", command=self.show_bmi_result,style='press.TButton')
+        button_calculate.pack(side=tk.RIGHT,expand=True,fill=tk.X)
 
-        button_calculate = ttk.Button(self, text="計算", command=self.show_bmi_result,style='press.TButton')
-        button_calculate.pack(side=tk.RIGHT,padx=(0,35),pady=10)
+        button_close = ttk.Button(button_frame, text="關閉",command=self.destroy,style='press.TButton')
+        button_close.pack(side=tk.LEFT,expand=True,fill=tk.X)
+        button_frame.pack(padx=20,fill=tk.X,pady=(0,15))
 
+    
     
     def show_bmi_result(self):
         try:
@@ -91,9 +95,6 @@ class Window(ThemedTk):
                 advice = f"您需要至少減少 {abs(weight_change):.2f} 公斤才能達到正常體重。"
 
             CustomMessagebox(self,title="BMI",name=name,bmi=bmi,status=status,advice=advice,status_color=status_color)
-
-    def __repr__(self):
-        return "我是window的實體"
             
             
             

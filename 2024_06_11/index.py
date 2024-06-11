@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedTk
 from tkinter import messagebox
+from tools import CustomMessagebox
 
 class Window(ThemedTk):
     def __init__(self,theme:str | None,**kwargs): #定義 init
@@ -25,21 +26,27 @@ class Window(ThemedTk):
         label_name = ttk.Label(input_frame, text="姓名:")
         label_name.grid(row=0, column=0, padx=5, pady=5,sticky=tk.E)
 
-        self.entry_name = ttk.Entry(input_frame)
-        self.entry_name.grid(row=0, column=1, padx=5, pady=5)
+        self.name_value = tk.StringVar()
+        self.name_value.set('')
+        entry_name = ttk.Entry(input_frame,textvariable=self.name_value)
+        entry_name.grid(row=0, column=1, padx=5, pady=5)
 
         # 身高體重
         label_height = ttk.Label(input_frame, text="身高 (cm):")
         label_height.grid(row=1, column=0, padx=5, pady=5,sticky=tk.E)
 
-        self.entry_height = ttk.Entry(input_frame)
-        self.entry_height.grid(row=1, column=1, padx=5, pady=5)
+        self.hight_value = tk.StringVar()
+        self.hight_value.set('')
+        entry_height = ttk.Entry(input_frame,textvariable=self.hight_value)
+        entry_height.grid(row=1, column=1, padx=5, pady=5)
 
         label_weight = ttk.Label(input_frame, text="體重 (kg):")
         label_weight.grid(row=2, column=0, padx=5, pady=5,sticky=tk.E)
 
-        self.entry_weight = ttk.Entry(input_frame)
-        self.entry_weight.grid(row=2, column=1, padx=5, pady=5)
+        self.weight_value = tk.StringVar()
+        self.weight_value.set('')
+        entry_weight = ttk.Entry(input_frame,textvariable=self.weight_value)
+        entry_weight.grid(row=2, column=1, padx=5, pady=5)
 
         
         #視窗介面內部大小
@@ -86,9 +93,11 @@ class Window(ThemedTk):
                 weight_change = weight - ideal_weight
                 status_color = "red"
                 advice = f"您需要至少減少 {abs(weight_change):.2f} 公斤才能達到正常體重。"
+
+                CustomMessagebox(self,title="BMI",name=name,bmi=bmi,status=status,advice=advice)
             
-            result_message = f"{name}您好:\n   bmi:{bmi:.2f}\n   體重:{status}\n   建議:{advice}"
-            print(result_message)
+    def __repr__(self):
+        return "我是window的實體"        
 
 
 

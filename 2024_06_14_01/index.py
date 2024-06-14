@@ -2,6 +2,9 @@ from ttkthemes import ThemedTk
 import tkinter as tk
 from tkinter import ttk, messagebox
 import data
+from data import FilterData,Info
+
+
 
 class Window(ThemedTk):
     def __init__(self,theme:str='arc',**kwargs):
@@ -25,7 +28,7 @@ class Window(ThemedTk):
         #=================================
         tableFrame = ttk.Frame(mainFrame)
         columns = ('sna', 'sarea', 'mday','ar','total','rent_bikes','retuen_bikes')
-        tree = ttk.Treeview(tableFrame, columns=columns, show='headings')
+        tree = ttk.Treeview(tableFrame, columns=columns, show='headings',selectmode='browse')
         # define headings
         tree.heading('sna', text='站點')
         tree.heading('sarea', text='行政區')
@@ -69,7 +72,8 @@ class Window(ThemedTk):
         for selected_item in tree.selection():
             item = tree.item(selected_item)
             record:list = item['values']
-            print(record[0])
+            site_data:Info = FilterData.get_selected_coordinate(sna=record[0],data=self.data)
+            print(site_data)
     
 
 def main():

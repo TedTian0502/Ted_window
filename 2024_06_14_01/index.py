@@ -3,8 +3,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import data
 from data import FilterData,Info
-from tools import CustomMessagebox
-
+# from tools import CustomMessagebox
+from tools2 import CustomMessagebox
 
 
 class Window(ThemedTk):

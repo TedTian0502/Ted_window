@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from ttkthemes import ThemedTk
-import YouBike_data  # 導入您的 YouBike_data 模塊
+import YouBike_data  # 導入 YouBike_data 模塊
 
 class Window(ThemedTk):
     def __init__(self, theme:str|None = None, **kwargs):

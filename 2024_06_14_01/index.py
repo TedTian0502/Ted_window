@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import data
 from data import FilterData,Info
+from tools import CustomMessagebox
 
 
 
@@ -17,7 +18,7 @@ class Window(ThemedTk):
         
         self._display_interface()
         
-    @property                      #呼叫執行Line7
+    @property                   #呼叫執行Line11~19
     def data(self)->list[dict]:
         return self.__data
     
@@ -73,7 +74,7 @@ class Window(ThemedTk):
             item = tree.item(selected_item)
             record:list = item['values']
             site_data:Info = FilterData.get_selected_coordinate(sna=record[0],data=self.data)
-            print(site_data)
+            CustomMessagebox(self,title=site_data.sna,site=site_data)
     
 
 def main():

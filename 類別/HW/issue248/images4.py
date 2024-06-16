@@ -6,14 +6,14 @@ class Example(Frame):
 
     def __init__(self,master):
         super().__init__(master)
-        master.title("Home icon")
+        master.title("Delete icon")
         self.pack(fill=BOTH, expand=1)
         self.initUI()
 
 
     def initUI(self):
 
-        self.img = Image.open("home.png")
+        self.img = Image.open("C:\Git hub\Ted_window\類別\HW\issue248\icon\delete.png")
         self.tatras = ImageTk.PhotoImage(self.img)
         canvas = Canvas(self, width=self.img.size[0]+20,
            height=self.img.size[1]+20)

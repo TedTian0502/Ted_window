@@ -8,13 +8,13 @@
 
 ## 1. 畫線
 
-![picture1]()
+![picture1](./picture/pic_1.png)
 
 ---
 
 ## 2. 矩形(線框和填色)
 
-![picture2]()
+![picture2](./picture/pic_.png)
 
 ---
 

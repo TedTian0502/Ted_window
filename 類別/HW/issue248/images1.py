@@ -13,8 +13,8 @@ class Example(Frame):
     def initUI(self):
         canvas = Canvas(self)
         canvas.create_line(15, 30, 200, 30)
-        canvas.create_line(300, 35, 300, 200, dash=(4, 2))
-        canvas.create_line(55, 85, 155, 85, 105, 180, 55, 85)
+        canvas.create_line(200, 35, 200, 200, dash=(6, 2))
+        canvas.create_line(55, 100, 180, 70, 115, 190, 55, 70)
         canvas.pack(fill=BOTH, expand=1)
 
 

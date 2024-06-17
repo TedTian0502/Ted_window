@@ -29,7 +29,7 @@ class Window(ThemedTk):
         #=================================
         tableFrame = ttk.Frame(mainFrame)
         columns = ('sna', 'sarea', 'mday','ar','total','rent_bikes','retuen_bikes')
-        tree = ttk.Treeview(tableFrame, columns=columns, show='headings',selectmode='browse')
+        tree = ttk.Treeview(tableFrame, columns=columns, show='headings')
         # define headings
         tree.heading('sna', text='站點')
         tree.heading('sarea', text='行政區')
@@ -65,17 +65,22 @@ class Window(ThemedTk):
         scrollbar.grid(row=0, column=1, sticky='ns')
         tableFrame.pack(expand=True,fill=tk.BOTH,padx=20,pady=20)
         #======================================
-        pieChartFrame = PieChartFrame(mainFrame)
-        pieChartFrame.pack(expand=True,fill='both')
+        self.pieChartFrame = PieChartFrame(mainFrame)
+        self.pieChartFrame.pack(expand=True,fill='both')
         mainFrame.pack(expand=True,fill=tk.BOTH,padx=10,pady=10)
 
     def item_selected(self,event):
         tree = event.widget
+        records:list[list] = [] 
         for selected_item in tree.selection():
             item = tree.item(selected_item)
             record:list = item['values']
-            print(record)
+            records.append(record)
+        self.pieChartFrame.infos = records
     
+
+
+
 
 class PieChartFrame(ttk.Frame):
     def __init__(self,master:Misc,**kwargs):
@@ -84,14 +89,27 @@ class PieChartFrame(ttk.Frame):
         #self.config({'borderwidth':2,'relief':'groove'})        
         #self['borderwidth'] = 2
         #self['relief'] = 'groove' 
-        canvas = tk.Canvas(self)
-        canvas.create_line(15, 30, 200,30)
-        canvas.create_line(300,35, 300, 200,dash=(8,2))
-        canvas.create_line(55,85,155,85,105,180,55,85)
-        canvas.pack(expand=True,fill='both')
+        
+    @property
+    def infos(self)->None:
+            return
 
-
-
+    @infos.setter
+    def infos(self,datas:list[list]) -> None:
+        for w in self.winfo_children():
+            w.destroy()
+            
+        for data in datas:
+            sitename:str = data[0]
+            area:str = data[1]
+            info_time:str = data[2]
+            address:str = data[3]
+            total:int = data[4]
+            rents:int = data[5]
+            returns:int = data[6]
+            oneFrame = ttk.Frame(self)
+            ttk.Label(oneFrame,text=area).grid(row=0,column=0)
+            oneFrame.pack(side='left') 
 
 
 

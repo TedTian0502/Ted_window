@@ -1,3 +1,4 @@
+# 4. 畫圖片
 from tkinter import Tk, Canvas, Frame, BOTH, NW
 from PIL import Image, ImageTk
 

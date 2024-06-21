@@ -28,3 +28,11 @@ conda activate myenv
 
 安裝套件:
 pip install -r requirements.txt
+
+克隆資料:
+
+1.點開git bash
+
+2.搜尋跟目錄，如GitHub
+
+3.git clone (檔案的HTTPS)

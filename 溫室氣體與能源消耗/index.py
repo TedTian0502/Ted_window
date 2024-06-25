@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import datasource
 import os
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 filterWrose_numbers = 3
 
@@ -76,14 +77,16 @@ class MyWindow(tk.Tk):
         self.tree.column("#1", minwidth=0, width=80)
         self.tree.heading('#2', text='co2')
         self.tree.column("#2", minwidth=0, width=80)
-        self.tree.heading('#3', text='coal_co2')
+        self.tree.heading('#3', text='co2_per_capita')
         self.tree.column("#3", minwidth=0, width=80)
-        self.tree.heading('#4', text='gas_co2')
-        self.tree.column("#4", minwidth=0, width=80)
-        self.tree.heading('#5', text='oil_co2')
-        self.tree.column("#5", minwidth=0, width=80)
-        self.tree.heading('#6', text='trade_co2')
+        self.tree.heading('#4', text='energy_per_capita')
+        self.tree.column("#4", minwidth=0, width=90)
+        self.tree.heading('#5', text='ghg_per_capita')
+        self.tree.column("#5", minwidth=0, width=90)
+        self.tree.heading('#6', text='population')
         self.tree.column("#6", minwidth=0, width=80)
+        # self.tree.heading('#7', text='gdp')
+        # self.tree.column("#7", minwidth=0, width=80)
 
         self.tree.pack(side=tk.LEFT)
 
@@ -112,15 +115,43 @@ class MyWindow(tk.Tk):
 
     def show_line_chart(self):
         selected_country = self.combobox.get()
-        if selected_country != '請選擇國家別vvv':
+        if selected_country != '請選擇一個國家vvv':
             filtered_data = self.selectdata[self.selectdata['country'] == selected_country]
             years = filtered_data['year']
-            co2_values = filtered_data['co2']
-            plt.plot(years, co2_values)
+            energy_consumption = filtered_data['energy_per_capita']  # 假設這裡是能源消耗量的數據列
+            co2_emissions = filtered_data['co2_per_capita']  # 假設這裡是二氧化碳排放量的數據列
+
+            # Create a new top-level window
+            top_window = tk.Toplevel(self)
+            top_window.title(f'Charts for {selected_country}')
+            
+            # Create the first plot for energy consumption
+            plt.figure(figsize=(8, 6))
+            plt.plot(years, energy_consumption, marker='o', linestyle='-', color='b')
+            plt.xlabel('Year')
+            plt.ylabel('Energy Consumption')
+            plt.title(f'Energy Consumption in {selected_country}')
+            plt.grid(True)
+            plt.tight_layout()
+
+            # Embed the plot in a tkinter canvas in the new window
+            canvas1 = FigureCanvasTkAgg(plt.gcf(), master=top_window)
+            canvas1.draw()
+            canvas1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+            # Create the second plot for CO2 emissions
+            plt.figure(figsize=(8, 6))
+            plt.plot(years, co2_emissions, marker='s', linestyle='-', color='g')
             plt.xlabel('Year')
             plt.ylabel('CO2 Emissions')
             plt.title(f'CO2 Emissions in {selected_country}')
-            plt.show()
+            plt.grid(True)
+            plt.tight_layout()
+
+            # Embed the plot in a tkinter canvas in the new window
+            canvas2 = FigureCanvasTkAgg(plt.gcf(), master=top_window)
+            canvas2.draw()
+            canvas2.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
     def create_widgets(self):
         # Create the plot button
@@ -128,7 +159,7 @@ class MyWindow(tk.Tk):
         self.plot_button.pack(side=tk.RIGHT, padx=10)
 
     def run(self):
-        self.title("Co2 Data")
+        self.title("GHG Data")
         self.geometry("700x600")
         self.create_widgets()
         self.mainloop()

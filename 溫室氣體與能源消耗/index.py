@@ -13,6 +13,10 @@ class MyWindow(tk.Tk):
         super().__init__()
 
         self.selectdata = None  # Placeholder for the data
+        self.canvas1 = None  # Canvas for the first plot
+        self.canvas2 = None  # Canvas for the second plot
+        self.fig1 = None  # Figure for the first plot
+        self.fig2 = None  # Figure for the second plot
 
         # add menubar that contains a menu
         self.menubar = tk.Menu(self)
@@ -31,15 +35,12 @@ class MyWindow(tk.Tk):
         self.bottomFrame = ttk.LabelFrame(self)
         self.bottomFrame.pack()
 
-        # add pic (commented out for now)
-        # self.canvas = tk.Canvas(self.topFrame, width=500, height=250)
-        # self.canvas.pack()
-
         # Check if logo image file exists
-        logo_path = './Images/co2logo.png'
+        logo_path = './Images/pic_1.jpg'
         if os.path.exists(logo_path):
             logoImage = Image.open(logo_path)
-            resizeImage = logoImage.resize((89, 82), Image.LANCZOS)
+            # resizeImage = logoImage.resize((89, 82), Image.LANCZOS)
+            resizeImage = logoImage.resize((460, 250), Image.LANCZOS)
             self.logoTkimage = ImageTk.PhotoImage(resizeImage)
 
             # Create canvas and display image
@@ -85,9 +86,6 @@ class MyWindow(tk.Tk):
         self.tree.column("#5", minwidth=0, width=90)
         self.tree.heading('#6', text='population')
         self.tree.column("#6", minwidth=0, width=80)
-        # self.tree.heading('#7', text='gdp')
-        # self.tree.column("#7", minwidth=0, width=80)
-
         self.tree.pack(side=tk.LEFT)
 
         for i in range(self.selectdata['country'].size):
@@ -126,7 +124,7 @@ class MyWindow(tk.Tk):
             top_window.title(f'Charts for {selected_country}')
             
             # Create the first plot for energy consumption
-            plt.figure(figsize=(8, 6))
+            self.fig1 = plt.figure(figsize=(6, 4))
             plt.plot(years, energy_consumption, marker='o', linestyle='-', color='b')
             plt.xlabel('Year')
             plt.ylabel('Energy Consumption')
@@ -135,12 +133,12 @@ class MyWindow(tk.Tk):
             plt.tight_layout()
 
             # Embed the plot in a tkinter canvas in the new window
-            canvas1 = FigureCanvasTkAgg(plt.gcf(), master=top_window)
-            canvas1.draw()
-            canvas1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            self.canvas1 = FigureCanvasTkAgg(self.fig1, master=top_window)
+            self.canvas1.draw()
+            self.canvas1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
             # Create the second plot for CO2 emissions
-            plt.figure(figsize=(8, 6))
+            self.fig2 = plt.figure(figsize=(6, 4))
             plt.plot(years, co2_emissions, marker='s', linestyle='-', color='g')
             plt.xlabel('Year')
             plt.ylabel('CO2 Emissions')
@@ -149,14 +147,38 @@ class MyWindow(tk.Tk):
             plt.tight_layout()
 
             # Embed the plot in a tkinter canvas in the new window
-            canvas2 = FigureCanvasTkAgg(plt.gcf(), master=top_window)
-            canvas2.draw()
-            canvas2.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+            self.canvas2 = FigureCanvasTkAgg(self.fig2, master=top_window)
+            self.canvas2.draw()
+            self.canvas2.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+            # Create a button to close the plot
+            close_button = ttk.Button(top_window, text="Close Plot", command=self.close_plot)
+            close_button.pack(side='bottom', padx=10, pady=5)
+
+    def close_plot(self):
+        # Delete all items from Canvas 1
+        if self.canvas1:
+            for item in self.canvas1.get_tk_widget().find_all():
+                self.canvas1.get_tk_widget().delete(item)
+            # Close the figure 1
+            plt.close(self.fig1)
+
+        # Delete all items from Canvas 2
+        if self.canvas2:
+            for item in self.canvas2.get_tk_widget().find_all():
+                self.canvas2.get_tk_widget().delete(item)
+            # Close the figure 2
+            plt.close(self.fig2)
 
     def create_widgets(self):
         # Create the plot button
         self.plot_button = ttk.Button(self.combobox_frame, text="查看線圖", command=self.show_line_chart)
         self.plot_button.pack(side=tk.RIGHT, padx=10)
+
+    def on_closing(self):
+        print("手動關閉視窗")
+        self.destroy()
+        self.quit()    
 
     def run(self):
         self.title("GHG Data")
@@ -167,3 +189,4 @@ class MyWindow(tk.Tk):
 if __name__ == '__main__':
     window = MyWindow()
     window.run()
+

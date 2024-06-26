@@ -190,3 +190,4 @@ if __name__ == '__main__':
     window = MyWindow()
     window.run()
 
+# 星期五下午確認投影片

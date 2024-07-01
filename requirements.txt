@@ -5,3 +5,4 @@ tkintermapview
 matplotlib
 numpy
 pandas
+scipy

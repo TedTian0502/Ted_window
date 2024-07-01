@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
 import datasource
 import os
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -170,6 +172,17 @@ class MyWindow(tk.Tk):
             plt.title(f'Scatter Plot of Energy vs CO2 Emissions in {selected_country}')
             plt.grid(True)
             plt.tight_layout()
+            
+            # Calculate and display trend line
+            slope, intercept, r_value, p_value, std_err = stats.linregress(filtered_data['energy_per_capita'], filtered_data['co2_per_capita'])
+            line = slope * filtered_data['energy_per_capita'] + intercept
+            plt.plot(filtered_data['energy_per_capita'], line, color='red', label='Trend Line')
+
+            # Annotate with equation and R-squared value
+            equation_text = f'y = {slope:.2f}x + {intercept:.2f}'
+            r_squared_text = f'R^2 = {r_value**2:.2f}'
+            plt.text(0.1, 0.9, equation_text, fontsize=10, transform=plt.gca().transAxes)
+            plt.text(0.1, 0.85, r_squared_text, fontsize=10, transform=plt.gca().transAxes)
 
             # Embed the plot in a tkinter canvas in the new window
             self.canvas2 = FigureCanvasTkAgg(self.fig2, master=top_window)

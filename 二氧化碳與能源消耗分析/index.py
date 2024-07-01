@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
 import datasource
 import os
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -39,7 +41,6 @@ class MyWindow(tk.Tk):
         logo_path = './Images/pic_1.jpg'
         if os.path.exists(logo_path):
             logoImage = Image.open(logo_path)
-            # resizeImage = logoImage.resize((89, 82), Image.LANCZOS)
             resizeImage = logoImage.resize((460, 250), Image.LANCZOS)
             self.logoTkimage = ImageTk.PhotoImage(resizeImage)
 
@@ -53,13 +54,20 @@ class MyWindow(tk.Tk):
             self.canvas.pack()
             self.canvas.create_text(250, 125, text="Image not found", font=("Helvetica", 20))
 
-        # Create the combobox
+        # Create the first combobox for selecting country
         self.combobox_frame = ttk.Frame(self.topFrame)
         self.combobox_frame.pack(pady=10)
         self.combobox_label = ttk.Label(self.combobox_frame, text="Select Country:")
         self.combobox_label.pack(side=tk.LEFT)
         self.combobox = ttk.Combobox(self.combobox_frame, state="readonly")
         self.combobox.pack(side=tk.LEFT)
+
+        # Create the second combobox for selecting chart type
+        self.chart_type_label = ttk.Label(self.combobox_frame, text="Select Chart Type:")
+        self.chart_type_label.pack(side=tk.LEFT, padx=10)
+        self.chart_type_combobox = ttk.Combobox(self.combobox_frame, values=["折線圖", "散點圖"], state="readonly")
+        self.chart_type_combobox.pack(side=tk.LEFT)
+        self.chart_type_combobox.current(0)  # Select the first option by default
 
         self.selectdata = datasource.getInfo()
 
@@ -103,7 +111,6 @@ class MyWindow(tk.Tk):
         combobox = event.widget
         selected_index = combobox.current()
         selected_country = self.combobox_values[selected_index]
-        #self.filterWrose3 = datasource.filterWrose3(self.combobox_values,filterWrose_numbers)
 
         if selected_country != '請選擇國家別vvv':
             filtered_data = self.selectdata[self.selectdata['country'] == selected_country]
@@ -122,7 +129,8 @@ class MyWindow(tk.Tk):
             # Create a new top-level window
             top_window = tk.Toplevel(self)
             top_window.title(f'Charts for {selected_country}')
-            
+
+        if self.chart_type_combobox.get() == "折線圖":
             # Create the first plot for energy consumption
             self.fig1 = plt.figure(figsize=(6, 4))
             plt.plot(years, energy_consumption, marker='o', linestyle='-', color='b')
@@ -155,20 +163,53 @@ class MyWindow(tk.Tk):
             close_button = ttk.Button(top_window, text="Close Plot", command=self.close_plot)
             close_button.pack(side='bottom', padx=10, pady=5)
 
+        elif self.chart_type_combobox.get() == "散點圖":
+            # Create the plot for CO2 emissions
+            self.fig2 = plt.figure(figsize=(6, 4))
+            plt.scatter(filtered_data['energy_per_capita'], filtered_data['co2_per_capita'], color='g')
+            plt.xlabel('Energy per Capita')
+            plt.ylabel('CO2 per Capita')
+            plt.title(f'Scatter Plot of Energy vs CO2 Emissions in {selected_country}')
+            plt.grid(True)
+            plt.tight_layout()
+            
+            # Calculate and display trend line
+            slope, intercept, r_value, p_value, std_err = stats.linregress(filtered_data['energy_per_capita'], filtered_data['co2_per_capita'])
+            line = slope * filtered_data['energy_per_capita'] + intercept
+            plt.plot(filtered_data['energy_per_capita'], line, color='red', label='Trend Line')
+
+            # Annotate with equation and R-squared value
+            equation_text = f'y = {slope:.4f}x + {intercept:.4f}'
+            r_squared_text = f'R^2 = {r_value**2:.4f}'
+            plt.text(0.1, 0.9, equation_text, fontsize=10, transform=plt.gca().transAxes)
+            plt.text(0.1, 0.85, r_squared_text, fontsize=10, transform=plt.gca().transAxes)
+
+            # Embed the plot in a tkinter canvas in the new window
+            self.canvas2 = FigureCanvasTkAgg(self.fig2, master=top_window)
+            self.canvas2.draw()
+            self.canvas2.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+            # Create a button to close the plot
+            close_button = ttk.Button(top_window, text="Close Plot", command=self.close_plot)
+            close_button.pack(side='bottom', padx=10, pady=5)
+
     def close_plot(self):
         # Delete all items from Canvas 1
-        if self.canvas1:
+        if self.canvas1 and self.canvas1.get_tk_widget().winfo_exists():
             for item in self.canvas1.get_tk_widget().find_all():
                 self.canvas1.get_tk_widget().delete(item)
             # Close the figure 1
-            plt.close(self.fig1)
+            if self.fig1:
+                plt.close(self.fig1)
 
         # Delete all items from Canvas 2
-        if self.canvas2:
+        if self.canvas2 and self.canvas2.get_tk_widget().winfo_exists():
             for item in self.canvas2.get_tk_widget().find_all():
                 self.canvas2.get_tk_widget().delete(item)
             # Close the figure 2
-            plt.close(self.fig2)
+            if self.fig2:
+                plt.close(self.fig2)
+
 
     def create_widgets(self):
         # Create the plot button
@@ -178,7 +219,7 @@ class MyWindow(tk.Tk):
     def on_closing(self):
         print("手動關閉視窗")
         self.destroy()
-        self.quit()    
+        self.quit()
 
     def run(self):
         self.title("GHG Data")

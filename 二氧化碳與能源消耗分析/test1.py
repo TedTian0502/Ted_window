@@ -179,8 +179,8 @@ class MyWindow(tk.Tk):
             plt.plot(filtered_data['energy_per_capita'], line, color='red', label='Trend Line')
 
             # Annotate with equation and R-squared value
-            equation_text = f'y = {slope:.2f}x + {intercept:.2f}'
-            r_squared_text = f'R^2 = {r_value**2:.2f}'
+            equation_text = f'y = {slope:.4f}x + {intercept:.4f}'
+            r_squared_text = f'R^2 = {r_value**2:.4f}'
             plt.text(0.1, 0.9, equation_text, fontsize=10, transform=plt.gca().transAxes)
             plt.text(0.1, 0.85, r_squared_text, fontsize=10, transform=plt.gca().transAxes)
 

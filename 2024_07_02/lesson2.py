@@ -1,9 +1,13 @@
 import psycopg2
 import data
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 def main():
 
-    conn = psycopg2.connect("postgresql://tvdi_vf7z_user:JCgL4deGUYueFydNQFkCViaj3DFeYZNC@dpg-cpscsm2j1k6c738l6m50-a.singapore-postgres.render.com/tvdi_vf7z")
+    conn = psycopg2.connect(os.environ['POSTGRESQL_TOKEN'])
     with conn: 
         with conn.cursor() as cursor: 
             sql='''

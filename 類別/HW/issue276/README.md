@@ -1,6 +1,6 @@
 ## issue276. 下載youbike的資料,進入postgreSQL的youbike的table
 
-### [程式碼]()
+### [程式碼](https://github.com/TedTian0502/Ted_window/blob/main/%E9%A1%9E%E5%88%A5/HW/issue276/index.py)
 
 ---
 

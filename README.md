@@ -36,3 +36,9 @@ pip install -r requirements.txt
 2.搜尋跟目錄，如GitHub
 
 3.git clone (檔案的HTTPS)
+
+### linux
+
+crontab -l
+
+crontab -r

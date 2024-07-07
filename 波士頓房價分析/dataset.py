@@ -15,9 +15,9 @@ def getInfo() -> pd.DataFrame:
 
     return selectdata
 
-# 範例使用
-selected_data = getInfo()
-print(selected_data)
+# 顯示資料集內容
+# selected_data = getInfo()
+# print(selected_data)
 
 
 

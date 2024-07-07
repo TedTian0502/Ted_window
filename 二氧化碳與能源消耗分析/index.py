@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk,messagebox
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import numpy as np
@@ -53,21 +53,26 @@ class MyWindow(tk.Tk):
             self.canvas = tk.Canvas(self.topFrame, width=500, height=250, bg='white')
             self.canvas.pack()
             self.canvas.create_text(250, 125, text="Image not found", font=("Helvetica", 20))
+        #===========================================================================================================
 
         # Create the first combobox for selecting country
         self.combobox_frame = ttk.Frame(self.topFrame)
         self.combobox_frame.pack(pady=10)
+
         self.combobox_label = ttk.Label(self.combobox_frame, text="Select Country:")
-        self.combobox_label.pack(side=tk.LEFT)
+        self.combobox_label.grid(row=0, column=0, padx=(10, 0))  # 使用 grid 進行排列
+
         self.combobox = ttk.Combobox(self.combobox_frame, state="readonly")
-        self.combobox.pack(side=tk.LEFT)
+        self.combobox.grid(row=0, column=1, padx=10)  # 使用 grid 進行排列
 
         # Create the second combobox for selecting chart type
         self.chart_type_label = ttk.Label(self.combobox_frame, text="Select Chart Type:")
-        self.chart_type_label.pack(side=tk.LEFT, padx=10)
+        self.chart_type_label.grid(row=1, column=0, padx=(10, 0), pady=(10, 0))  # 使用 grid 進行排列
+
         self.chart_type_combobox = ttk.Combobox(self.combobox_frame, values=["折線圖", "散點圖"], state="readonly")
-        self.chart_type_combobox.pack(side=tk.LEFT)
+        self.chart_type_combobox.grid(row=1, column=1, padx=10, pady=(10, 0))  # 使用 grid 進行排列
         self.chart_type_combobox.current(0)  # Select the first option by default
+        #===========================================================================================================
 
         self.selectdata = datasource.getInfo()
 
@@ -82,18 +87,18 @@ class MyWindow(tk.Tk):
         # Create the treeview
         columns = ('#1', '#2', '#3', '#4', '#5', '#6')
         self.tree = ttk.Treeview(self.bottomFrame, columns=columns, show='headings')
-        self.tree.heading('#1', text='year')
+        self.tree.heading('#1', text='year', anchor='center')
         self.tree.column("#1", minwidth=0, width=80)
-        self.tree.heading('#2', text='co2')
+        self.tree.heading('#2', text='co2', anchor='center')
         self.tree.column("#2", minwidth=0, width=80)
-        self.tree.heading('#3', text='co2_per_capita')
-        self.tree.column("#3", minwidth=0, width=80)
-        self.tree.heading('#4', text='energy_per_capita')
-        self.tree.column("#4", minwidth=0, width=90)
-        self.tree.heading('#5', text='ghg_per_capita')
-        self.tree.column("#5", minwidth=0, width=90)
+        self.tree.heading('#3', text='co2_per_capita', anchor='center')
+        self.tree.column("#3", minwidth=0, width=100)
+        self.tree.heading('#4', text='energy_per_capita', anchor='center')
+        self.tree.column("#4", minwidth=0, width=110)
+        self.tree.heading('#5', text='ghg_per_capita', anchor='center')
+        self.tree.column("#5", minwidth=0, width=100)
         self.tree.heading('#6', text='population')
-        self.tree.column("#6", minwidth=0, width=80)
+        self.tree.column("#6", minwidth=0, width=100)
         self.tree.pack(side=tk.LEFT)
 
         for i in range(self.selectdata['country'].size):
@@ -120,15 +125,17 @@ class MyWindow(tk.Tk):
 
     def show_line_chart(self):
         selected_country = self.combobox.get()
-        if selected_country != '請選擇一個國家vvv':
-            filtered_data = self.selectdata[self.selectdata['country'] == selected_country]
-            years = filtered_data['year']
-            energy_consumption = filtered_data['energy_per_capita']  # 假設這裡是能源消耗量的數據列
-            co2_emissions = filtered_data['co2_per_capita']  # 假設這裡是二氧化碳排放量的數據列
+        if selected_country == '請選擇一個國家vvv':
+            messagebox.showwarning("未選擇國家", "請先選擇一個國家!")
+            return
 
-            # Create a new top-level window
-            top_window = tk.Toplevel(self)
-            top_window.title(f'Charts for {selected_country}')
+        filtered_data = self.selectdata[self.selectdata['country'] == selected_country]
+        years = filtered_data['year']
+        energy_consumption = filtered_data['energy_per_capita']
+        co2_emissions = filtered_data['co2_per_capita']
+
+        top_window = tk.Toplevel(self)
+        top_window.title(f'Charts for {selected_country}')
 
         if self.chart_type_combobox.get() == "折線圖":
             # Create the first plot for energy consumption
@@ -212,9 +219,9 @@ class MyWindow(tk.Tk):
 
 
     def create_widgets(self):
-        # Create the plot button
+        # Create the plot button using grid layout
         self.plot_button = ttk.Button(self.combobox_frame, text="查看線圖", command=self.show_line_chart)
-        self.plot_button.pack(side=tk.RIGHT, padx=10)
+        self.plot_button.grid(row=1, column=2, padx=10, pady=(10, 0))  # 使用 grid 進行排列
 
     def on_closing(self):
         print("手動關閉視窗")

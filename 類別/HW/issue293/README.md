@@ -1,9 +1,5 @@
 ## issue293. 請取出youbike表格內,所有站點的最新資料
 
-### [程式碼]()
-
----
-
 ### postgreSQL
 
 select count(*) as 數量  

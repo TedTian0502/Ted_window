@@ -42,3 +42,8 @@ pip install -r requirements.txt
 crontab -l
 
 crontab -r
+
+### 0709
+變更環境:venv2
+
+venv1環境有問題

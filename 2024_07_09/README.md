@@ -17,4 +17,4 @@ flask --app "hello" run --debug
 6.http url寫法
 /login?name=Ted&password=1234
 
-7.延伸模組載入: lorem
+7.延伸模組載入: lorem，Better jinja

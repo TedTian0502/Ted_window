@@ -2,7 +2,8 @@ import pandas as pd
 
 def getInfo() -> pd.DataFrame:
     # 讀取 CSV 文件
-    file_path = 'C:/Git hub/Ted_window/波士頓房價分析/train_dataset.csv'
+    # file_path = 'C:/Git hub/Ted_window/波士頓房價分析/train_dataset.csv' #家裡筆電
+    file_path = 'C:/Users/user/Documents/GitHub/Ted_window/波士頓房價分析/train_dataset.csv' #學校
     try:
         rowdata = pd.read_csv(file_path)
     except FileNotFoundError:
@@ -15,7 +16,7 @@ def getInfo() -> pd.DataFrame:
 
     return selectdata
 
-# 顯示資料集內容
+# 檢查csv讀取，並顯示資料集內容
 # selected_data = getInfo()
 # print(selected_data)
 

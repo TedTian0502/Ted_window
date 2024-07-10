@@ -69,7 +69,7 @@ class MyWindow(tk.Tk):
         self.chart_type_label = ttk.Label(self.combobox_frame, text="Select Chart Type:")
         self.chart_type_label.grid(row=1, column=0, padx=(10, 0), pady=(10, 0))  # 使用 grid 進行排列
 
-        self.chart_type_combobox = ttk.Combobox(self.combobox_frame, values=["折線圖", "散點圖"], state="readonly")
+        self.chart_type_combobox = ttk.Combobox(self.combobox_frame, values=["折線圖", "散佈圖"], state="readonly")
         self.chart_type_combobox.grid(row=1, column=1, padx=10, pady=(10, 0))  # 使用 grid 進行排列
         self.chart_type_combobox.current(0)  # Select the first option by default
         #===========================================================================================================
@@ -129,6 +129,9 @@ class MyWindow(tk.Tk):
             messagebox.showwarning("未選擇國家", "請先選擇一個國家!")
             return
 
+        # 如果存在，先關閉現有的圖表和相關的 canvas widget
+        self.close_plot()
+
         filtered_data = self.selectdata[self.selectdata['country'] == selected_country]
         years = filtered_data['year']
         energy_consumption = filtered_data['energy_per_capita']
@@ -170,7 +173,7 @@ class MyWindow(tk.Tk):
             close_button = ttk.Button(top_window, text="Close Plot", command=self.close_plot)
             close_button.pack(side='bottom', padx=10, pady=5)
 
-        elif self.chart_type_combobox.get() == "散點圖":
+        elif self.chart_type_combobox.get() == "散佈圖":
             # Create the plot for CO2 emissions
             self.fig2 = plt.figure(figsize=(6, 4))
             plt.scatter(filtered_data['energy_per_capita'], filtered_data['co2_per_capita'], color='g')
@@ -201,19 +204,19 @@ class MyWindow(tk.Tk):
             close_button.pack(side='bottom', padx=10, pady=5)
 
     def close_plot(self):
-        # Delete all items from Canvas 1
+        # 刪除 Canvas 1 上的所有項目
         if self.canvas1 and self.canvas1.get_tk_widget().winfo_exists():
             for item in self.canvas1.get_tk_widget().find_all():
                 self.canvas1.get_tk_widget().delete(item)
-            # Close the figure 1
+            # 關閉圖表視窗1
             if self.fig1:
                 plt.close(self.fig1)
 
-        # Delete all items from Canvas 2
+        # 刪除 Canvas 2 上的所有項目
         if self.canvas2 and self.canvas2.get_tk_widget().winfo_exists():
             for item in self.canvas2.get_tk_widget().find_all():
                 self.canvas2.get_tk_widget().delete(item)
-            # Close the figure 2
+            # 關閉圖表視窗2
             if self.fig2:
                 plt.close(self.fig2)
 

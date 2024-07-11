@@ -19,3 +19,15 @@ flask --app "hello" run --debug
 /login?name=Ted&password=1234
 
 7.延伸模組載入: lorem，Better jinja
+
+8.(% %) statements(敘述,不會傳出值)
+
+9.{()} expression(運算式,傳出一段內容)
+
+10.{%block head %}  
+    block: 關鍵字  
+    head: block名字
+
+10-1.{endblock %}
+
+11.{{ super() }}:複製架構

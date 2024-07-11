@@ -29,6 +29,9 @@ conda activate myenv
 安裝套件:
 pip install -r requirements.txt
 
+(conda install,很常失敗)
+conda install --yes --file requirements.txt
+
 克隆資料:
 
 1.點開git bash

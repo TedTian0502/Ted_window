@@ -24,7 +24,7 @@
 安裝虛擬環境:影片_0516下午 ，長度_1:22:39
 
 啟動虛擬環境:
-conda activate myenv
+conda activate venv1
 
 安裝套件:
 pip install -r requirements.txt

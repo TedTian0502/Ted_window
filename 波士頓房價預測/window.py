@@ -1,9 +1,13 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, Button,messagebox
 from dataset import getInfo
-import pandas as pd
+import numpy as np       #數學處理
+import pandas as pd       #資料處理
+import matplotlib.pyplot as plt #繪圖
+import seaborn as sns
+from tkinter import filedialog
 
-# cd 波士頓房價分析
+# cd 波士頓房價預測
 
 # 使用 getInfo 函數從 dataset.py 中載入資料集
 df = getInfo()
@@ -17,8 +21,26 @@ if df.empty:
 class MyWindow(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("My Window")
-        # 其他初始化設定
+        self.option_add('*font',('Tahoma', 15, 'bold'))
+        self.title("波士頓房價預測")
+
+        # 設定窗口大小
+        self.geometry("600x400")
+
+        # 創建框架放置標籤和按鈕
+        frame = tk.Frame(self)
+        frame.pack(anchor="nw")
+
+        # 標籤設計
+        label = tk.Label(frame, text="波士頓房價", bg="lightblue", relief="raised", padx=20, pady=10)
+        label.pack(side="left",)  # 放置在框架的左側
+        
+        # 按鈕設計
+        btn_text = "查看數據集 \u21E9" 
+        btn = tk.Button(frame, text=btn_text, pady=5)
+        btn.pack(side="left", padx=5)  # 放置在框架的左側
+
+        
         
     def run(self):
         self.mainloop()
@@ -26,3 +48,5 @@ class MyWindow(tk.Tk):
 if __name__ == "__main__":
     app = MyWindow()
     app.run()
+
+

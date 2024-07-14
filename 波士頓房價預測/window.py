@@ -25,6 +25,18 @@ class MyWindow(tk.Tk):
         self.title("波士頓房價預測")
         self.geometry("800x600")
         
+        self.create_widgets()
+
+        # 初始化 Treeview 相關變量
+        self.tree_frame1 = None
+        self.tree1 = None
+        self.tree_frame2 = None
+        self.tree2 = None
+
+        # 設置窗口關閉時的處理
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def create_widgets(self):
         # 創建框架放置標籤和按鈕
         self.frame = tk.Frame(self)
         self.frame.pack(anchor="nw")
@@ -41,112 +53,89 @@ class MyWindow(tk.Tk):
         self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=10, command=self.reset_data)
         self.reset_btn.pack(side="left", padx=(5, 0))
 
-        # 獨立的框架用於放置 Treeview 和捲動軸
-        self.tree_frame1 = None  # 初始時設置為空
-        self.tree1 = None  # 初始時設置為空
-
-        self.tree_frame2 = None  # 初始時設置為空
-        self.tree2 = None  # 初始時設置為空
-
-        # 設置窗口關閉時的處理
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
-
     def show_data(self):
         if self.tree_frame1 is None:
-            # 創建獨立的框架來放置第一個 Treeview 和捲動軸
-            self.tree_frame1 = tk.Frame(self)
-            self.tree_frame1.pack(pady=20, padx=(10, 370))  # 調整大小與位置
-
-            # 創建第一個 Treeview
-            self.tree1 = ttk.Treeview(self.tree_frame1, columns=("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"), show="headings")
-
-            # 設置列標題
-            for col in ("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"):
-                self.tree1.heading(col, text=col, anchor="center")
-                self.tree1.column(col, anchor="center")
-
-            # 設置列的最小和最大寬度
-            for col in ("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"):
-                self.tree1.column(col, minwidth=40, width=80)
-
-            # 垂直捲動軸
-            vsb1 = ttk.Scrollbar(self.tree_frame1, orient="vertical", command=self.tree1.yview)
-            self.tree1.configure(yscrollcommand=vsb1.set)
-            vsb1.pack(side="right", fill="y")
-
-            # 水平捲動軸
-            hsb1 = ttk.Scrollbar(self.tree_frame1, orient="horizontal", command=self.tree1.xview)
-            self.tree1.configure(xscrollcommand=hsb1.set)
-            hsb1.pack(side="bottom", fill="x")
-
-            # 設置 Treeview 的高度和寬度
-            self.tree1.pack(side="left", fill="both", expand=True)
-            self.tree_frame1.grid_rowconfigure(0, weight=1)
-            self.tree_frame1.grid_columnconfigure(0, weight=1)
-
-            # 從 CSV 檔案讀取數據
-            try:
-                df = pd.read_csv("./train_dataset.csv")
-
-                for index, row in df.head(20).iterrows():
-                    data = tuple(row)
-                    self.tree1.insert("", "end", values=data)
-
-            except FileNotFoundError:
-                print("找不到指定的 CSV 檔案。")
+            self.create_treeview1()
 
         if self.tree_frame2 is None:
-            # 創建獨立的框架來放置第二個 Treeview 和捲動軸
-            self.tree_frame2 = tk.Frame(self)
-            self.tree_frame2.pack(pady=20, padx=(10, 370))  # 調整大小與位置
+            self.create_treeview2()
 
-            # 創建第二個 Treeview
-            self.tree2 = ttk.Treeview(self.tree_frame2, columns=("属性", "值"), show="headings")
+    def create_treeview1(self):
+        self.tree_frame1 = tk.Frame(self)
+        self.tree_frame1.pack(pady=20, padx=(10, 370))
 
-            # 設置列標題
-            self.tree2.heading("属性", text="属性", anchor="center")
-            self.tree2.heading("值", text="值", anchor="center")
+        self.tree1 = ttk.Treeview(self.tree_frame1, columns=("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"), show="headings")
 
-            # 設置列的最小和最大寬度
-            self.tree2.column("属性", minwidth=100, width=200)
-            self.tree2.column("值", minwidth=100, width=200)
+        for col in ("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"):
+            self.tree1.heading(col, text=col, anchor="center")
+            self.tree1.column(col, anchor="center", width=80, stretch=False)
 
-            # 垂直捲動軸
-            vsb2 = ttk.Scrollbar(self.tree_frame2, orient="vertical", command=self.tree2.yview)
-            self.tree2.configure(yscrollcommand=vsb2.set)
-            vsb2.pack(side="right", fill="y")
+        vsb1 = ttk.Scrollbar(self.tree_frame1, orient="vertical", command=self.tree1.yview)
+        self.tree1.configure(yscrollcommand=vsb1.set)
+        vsb1.pack(side="right", fill="y")
 
-            # 水平捲動軸
-            hsb2 = ttk.Scrollbar(self.tree_frame2, orient="horizontal", command=self.tree2.xview)
-            self.tree2.configure(xscrollcommand=hsb2.set)
-            hsb2.pack(side="bottom", fill="x")
+        hsb1 = ttk.Scrollbar(self.tree_frame1, orient="horizontal", command=self.tree1.xview)
+        self.tree1.configure(xscrollcommand=hsb1.set)
+        hsb1.pack(side="bottom", fill="x")
 
-            # 設置 Treeview 的高度和寬度
-            self.tree2.pack(side="left", fill="both", expand=True)
-            self.tree_frame2.grid_rowconfigure(0, weight=1)
-            self.tree_frame2.grid_columnconfigure(0, weight=1)
+        self.tree1.pack(side="left", fill="both", expand=True)
+        self.tree_frame1.grid_rowconfigure(0, weight=1)
+        self.tree_frame1.grid_columnconfigure(0, weight=1)
 
-            # 從 CSV 檔案讀取數據
-            try:
-                df = pd.read_csv("./train_dataset.csv")
-                stats = df.describe().transpose()
-                for index, row in stats.iterrows():
-                    self.tree2.insert("", "end", values=(index, row["mean"]))
+        try:
+            df = pd.read_csv("./train_dataset.csv")
+            for index, row in df.head(20).iterrows():
+                data = tuple(row)
+                self.tree1.insert("", "end", values=data)
+        except FileNotFoundError:
+            print("找不到指定的 CSV 檔案。")
 
-            except FileNotFoundError:
-                print("找不到指定的 CSV 檔案。")
+    def create_treeview2(self):
+        self.tree_frame2 = tk.Frame(self)
+        self.tree_frame2.pack(pady=20, padx=(10, 370), fill="both", expand=True)
+
+        self.tree2 = ttk.Treeview(self.tree_frame2, columns=("Statistic", "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"), show="headings")
+
+        # 設置標題
+        self.tree2.heading("Statistic", text="Statistic", anchor="center")
+        self.tree2.column("Statistic", width=60, stretch=False)
+
+        for col in ("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"):
+            self.tree2.heading(col, text=col, anchor="center")
+            self.tree2.column(col, width=80, stretch=False)
+
+        hsb2 = ttk.Scrollbar(self.tree_frame2, orient="horizontal", command=self.tree2.xview)
+        self.tree2.configure(xscrollcommand=hsb2.set)
+        hsb2.pack(side="bottom", fill="x")
+
+        self.tree2.pack(side="left", fill="both", expand=True)
+        self.tree_frame2.grid_rowconfigure(0, weight=1)
+        self.tree_frame2.grid_columnconfigure(0, weight=1)
+
+        try:
+            df = pd.read_csv("./train_dataset.csv")
+            stats = df.describe()
+
+            for stat_index, stat_name in enumerate(["count", "mean", "std", "min", "25%", "50%", "75%", "max"]):
+                values = [stat_name] + [stats.loc[stat_name, col] for col in ("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE")]
+                self.tree2.insert("", "end", values=values)
+        except FileNotFoundError:
+            print("找不到指定的 CSV 檔案。")
 
     def reset_data(self):
+        self.destroy_treeview1()
+        self.destroy_treeview2()
+
+    def destroy_treeview1(self):
         if self.tree_frame1:
-            # 移除第一個 Treeview 和框架
             for widget in self.tree_frame1.winfo_children():
                 widget.destroy()
             self.tree_frame1.destroy()
             self.tree1 = None
             self.tree_frame1 = None
 
+    def destroy_treeview2(self):
         if self.tree_frame2:
-            # 移除第二個 Treeview 和框架
             for widget in self.tree_frame2.winfo_children():
                 widget.destroy()
             self.tree_frame2.destroy()
@@ -154,8 +143,10 @@ class MyWindow(tk.Tk):
             self.tree_frame2 = None
 
     def on_close(self):
-        # 關閉窗口時的處理，這裡只是簡單地退出應用程序
         self.destroy()
+
+    def run(self):
+        self.mainloop()
 
     def run(self):
         self.mainloop()

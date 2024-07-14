@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, Button,messagebox
+from tkinter import ttk, Toplevel, Checkbutton, Button, messagebox
 from dataset import getInfo
 import numpy as np       #數學處理
 import pandas as pd       #資料處理
@@ -25,6 +25,9 @@ class MyWindow(tk.Tk):
         self.title("波士頓房價預測")
         self.geometry("800x600")
         
+        # 呼叫函數以居中視窗
+        self.center_window(800, 600)
+
         self.create_widgets()
 
         # 初始化 Treeview 相關變量
@@ -35,6 +38,9 @@ class MyWindow(tk.Tk):
 
         # 設置窗口關閉時的處理
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+        # 選項視窗的成員變量
+        self.options_window = None
 
     def create_widgets(self):
         # 創建框架放置標籤和按鈕
@@ -50,8 +56,32 @@ class MyWindow(tk.Tk):
         self.show_btn.pack(side="left", padx=(5, 0))
 
         # 恢復初始狀態按鈕
-        self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=10, command=self.reset_data)
-        self.reset_btn.pack(side="left", padx=(5, 0))
+        self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=('Tahoma', 10), command=self.reset_data)
+        self.reset_btn.pack(side="left", padx=(5, 10))
+
+        # 新增按鈕 "打開選項"
+        self.open_options_btn = tk.Button(self.frame, text="打開選項", pady=5, command=self.open_options_window)
+        self.open_options_btn.pack(side="left")
+
+        # 創建 Canvas
+        self.canvas = tk.Canvas(self, width=800, height=600)
+        self.canvas.pack()
+        self.canvas.place(x=440, y=50, width=350, height=540)
+
+        # 繪製背景色塊或圖形
+        self.canvas.create_rectangle(0, 0, 800, 600, fill="#FBF6E2")
+
+    def center_window(self, width=800, height=600):
+        # 取得螢幕的寬度和高度
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+
+        # 計算視窗的位置，使其位於螢幕中央
+        position_x = (screen_width - width) // 2
+        position_y = (screen_height - height) // 2
+
+        # 設定視窗的寬度、高度及位置
+        self.geometry(f'{width}x{height}+{position_x}+{position_y}')
 
     def show_data(self):
         if self.tree_frame1 is None:
@@ -142,11 +172,44 @@ class MyWindow(tk.Tk):
             self.tree2 = None
             self.tree_frame2 = None
 
+    def open_options_window(self):
+        if self.options_window is None or not self.options_window.winfo_exists():
+            options_window = tk.Toplevel(self)
+            options_window.title("選擇選項")
+
+            # 動態計算選項視窗的大小
+            option_count = len(["選項1", "選項2", "選項3"])
+            window_width = 200
+            window_height = 50 + (38 * option_count) + 50 + 10  # 初始高度 + 每個選項的高度 + 按鈕的高度 + 內邊距
+
+            # 設定選項視窗的大小
+            options_window.geometry(f"{window_width}x{window_height}")
+
+            # 計算選項視窗的位置，使其位於背景顏色的區域
+            parent_x = self.winfo_rootx()
+            parent_y = self.winfo_rooty()
+            options_window.geometry(f"+{parent_x + 440}+{parent_y + 50}")
+
+            options = ["選項1", "選項2", "選項3"]
+            checkbuttons = []
+            for option in options:
+                checkbutton = tk.Checkbutton(options_window, text=option)
+                checkbutton.pack(pady=5)
+                checkbuttons.append(checkbutton)
+
+            # 將 options_window 設置為類的成員變量，以便後續檢查
+            self.options_window = options_window
+
+            def close_options_window():
+                options_window.destroy()
+
+            btn_finish = tk.Button(options_window, text="完成", command=close_options_window)
+            btn_finish.pack(pady=10, side="bottom")
+        else:
+            messagebox.showinfo("提示", "請勿連續點擊")
+
     def on_close(self):
         self.destroy()
-
-    def run(self):
-        self.mainloop()
 
     def run(self):
         self.mainloop()
@@ -154,5 +217,3 @@ class MyWindow(tk.Tk):
 if __name__ == "__main__":
     app = MyWindow()
     app.run()
-
-

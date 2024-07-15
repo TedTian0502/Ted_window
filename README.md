@@ -62,4 +62,10 @@ flask --app main run --debug
 3.錄影時間不要超過3min
 
 ### 0715
-
+--Render 2024_Ted_window建立:網頁站點搜尋
+1.+New ->Web Service ->Connect ->Ex:TedTian0502/Ted_window
+2.變更Name
+3.Start Command ->gunicorn
+4.Environments Variables ->NAME_OF_VARIABLE: POSTGRESQL_TOKEN
+->value: "Internal Database URL"
+5.Deploy Web Service等待"Live"

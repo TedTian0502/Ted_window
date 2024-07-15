@@ -69,3 +69,5 @@ flask --app main run --debug
 4.Environments Variables ->NAME_OF_VARIABLE: POSTGRESQL_TOKEN
 ->value: "Internal Database URL"
 5.Deploy Web Service等待"Live"
+6.更新內容->Events ->Delopy ->等待更新動作，直到"Live"
+7.網址可以貼到手機查看內容

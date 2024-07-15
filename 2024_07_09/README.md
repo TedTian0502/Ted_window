@@ -1,12 +1,14 @@
 [參考網址](https://flask.palletsprojects.com/en/3.0.x/quickstart/)
 
+[jinja2 documentation_Template Designer Documentation](https://jinja.palletsprojects.com/en/3.1.x/templates/)
+
 [參考網址](https://getbootstrap.com/docs/5.3/components/navbar/)
 
 1.註:gunicorn無法安裝
 
 2.若要執行，必須加上"--debug"
 
-flask --app "hello" run --debug
+flask --app main run --debug
 
 3.強制關閉  
 按下ctrl + c

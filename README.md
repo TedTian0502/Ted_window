@@ -47,9 +47,13 @@ crontab -l
 crontab -r
 
 ### 0709
+參考資料README.md
+
 變更環境:venv2
 
 venv1環境有問題
+
+flask --app main run --debug
 
 ### 0711
 專案繳交說明:  

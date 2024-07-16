@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, Toplevel, Checkbutton, Button, messagebox
+from tkinter import ttk, Toplevel, messagebox, Button
 from dataset import getInfo
 import numpy as np       #數學處理
 import pandas as pd       #資料處理
@@ -39,17 +39,19 @@ class MyWindow(tk.Tk):
         # 設置窗口關閉時的處理
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
-        # 選項視窗的成員變量
-        self.options_window = None
-
     def create_widgets(self):
         # 創建框架放置標籤和按鈕
         self.frame = tk.Frame(self)
-        self.frame.pack(anchor="nw")
+        self.frame.pack(anchor="nw", padx=5, pady=5)
 
         # 標籤設計
         self.label = tk.Label(self.frame, text="波士頓房價", bg="lightblue", relief="raised", padx=20, pady=10)
         self.label.pack(side="left")
+
+        # combobox設計
+        self.combobox = ttk.Combobox(self.frame, values=["查看數據分佈", "選項二", "選項三"], state="readonly")
+        self.combobox.set("請選擇圖表")
+        self.combobox.pack(side="left", padx=(5, 0))
 
         # 按鈕設計，包括文字和向下箭頭圖案
         self.show_btn = tk.Button(self.frame, text="查看數據集 \u21E9", pady=5, command=self.show_data)
@@ -59,17 +61,13 @@ class MyWindow(tk.Tk):
         self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=('Tahoma', 10), command=self.reset_data)
         self.reset_btn.pack(side="left", padx=(5, 10))
 
-        # 新增按鈕 "打開選項"
-        self.open_options_btn = tk.Button(self.frame, text="打開選項", pady=5, command=self.open_options_window)
+        # 新增按鈕 "評分"
+        self.open_options_btn = tk.Button(self.frame, text="評分", pady=5, command=self.show_rating_dialog)
         self.open_options_btn.pack(side="left")
 
-        # 創建 Canvas
-        self.canvas = tk.Canvas(self, width=800, height=600)
-        self.canvas.pack()
-        self.canvas.place(x=440, y=50, width=350, height=540)
-
-        # 繪製背景色塊或圖形
-        self.canvas.create_rectangle(0, 0, 800, 600, fill="#FBF6E2")
+        # 添加背景框架，並填充視窗下方
+        self.background_frame = tk.Frame(self, bg="#FBF6E2")
+        self.background_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
     def center_window(self, width=800, height=600):
         # 取得螢幕的寬度和高度
@@ -84,14 +82,22 @@ class MyWindow(tk.Tk):
         self.geometry(f'{width}x{height}+{position_x}+{position_y}')
 
     def show_data(self):
-        if self.tree_frame1 is None:
-            self.create_treeview1()
-
-        if self.tree_frame2 is None:
-            self.create_treeview2()
+        selected_option = self.combobox.get()
+        if selected_option == "請選擇圖表":
+            messagebox.showwarning("警告", "請先選擇一個選項")
+            return
+        
+        if selected_option == "查看數據分佈":
+            if self.tree1 is None:
+                self.create_treeview1()
+            if self.tree2 is None:
+                self.create_treeview2()
+        # 可以根據其他選項添加對應的顯示邏輯
+        # elif selected_option == "選項二":
+        #     pass
 
     def create_treeview1(self):
-        self.tree_frame1 = tk.Frame(self)
+        self.tree_frame1 = tk.Frame(self.background_frame)
         self.tree_frame1.pack(pady=20, padx=(10, 370))
 
         self.tree1 = ttk.Treeview(self.tree_frame1, columns=("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"), show="headings")
@@ -113,7 +119,7 @@ class MyWindow(tk.Tk):
         self.tree_frame1.grid_columnconfigure(0, weight=1)
 
         try:
-            df = pd.read_csv("./train_dataset.csv")
+            df = pd.read_csv("train_dataset.csv")
             for index, row in df.head(20).iterrows():
                 data = tuple(row)
                 self.tree1.insert("", "end", values=data)
@@ -121,7 +127,7 @@ class MyWindow(tk.Tk):
             print("找不到指定的 CSV 檔案。")
 
     def create_treeview2(self):
-        self.tree_frame2 = tk.Frame(self)
+        self.tree_frame2 = tk.Frame(self.background_frame)
         self.tree_frame2.pack(pady=20, padx=(10, 370), fill="both", expand=True)
 
         self.tree2 = ttk.Treeview(self.tree_frame2, columns=("Statistic", "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"), show="headings")
@@ -143,18 +149,19 @@ class MyWindow(tk.Tk):
         self.tree_frame2.grid_columnconfigure(0, weight=1)
 
         try:
-            df = pd.read_csv("./train_dataset.csv")
+            df = pd.read_csv("train_dataset.csv")
             stats = df.describe()
 
             for stat_index, stat_name in enumerate(["count", "mean", "std", "min", "25%", "50%", "75%", "max"]):
                 values = [stat_name] + [stats.loc[stat_name, col] for col in ("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE")]
                 self.tree2.insert("", "end", values=values)
         except FileNotFoundError:
-            print("找不到指定的 CSV 檔案。")
+            print("找不到指定的 CSV 檔案")
 
     def reset_data(self):
         self.destroy_treeview1()
         self.destroy_treeview2()
+        self.combobox.set("請選擇圖表")
 
     def destroy_treeview1(self):
         if self.tree_frame1:
@@ -172,41 +179,8 @@ class MyWindow(tk.Tk):
             self.tree2 = None
             self.tree_frame2 = None
 
-    def open_options_window(self):
-        if self.options_window is None or not self.options_window.winfo_exists():
-            options_window = tk.Toplevel(self)
-            options_window.title("選擇選項")
-
-            # 動態計算選項視窗的大小
-            option_count = len(["選項1", "選項2", "選項3"])
-            window_width = 200
-            window_height = 50 + (38 * option_count) + 50 + 10  # 初始高度 + 每個選項的高度 + 按鈕的高度 + 內邊距
-
-            # 設定選項視窗的大小
-            options_window.geometry(f"{window_width}x{window_height}")
-
-            # 計算選項視窗的位置，使其位於背景顏色的區域
-            parent_x = self.winfo_rootx()
-            parent_y = self.winfo_rooty()
-            options_window.geometry(f"+{parent_x + 440}+{parent_y + 50}")
-
-            options = ["選項1", "選項2", "選項3"]
-            checkbuttons = []
-            for option in options:
-                checkbutton = tk.Checkbutton(options_window, text=option)
-                checkbutton.pack(pady=5)
-                checkbuttons.append(checkbutton)
-
-            # 將 options_window 設置為類的成員變量，以便後續檢查
-            self.options_window = options_window
-
-            def close_options_window():
-                options_window.destroy()
-
-            btn_finish = tk.Button(options_window, text="完成", command=close_options_window)
-            btn_finish.pack(pady=10, side="bottom")
-        else:
-            messagebox.showinfo("提示", "請勿連續點擊")
+    def show_rating_dialog(self):
+        messagebox.showinfo("分數", "準確率為: XXX")
 
     def on_close(self):
         self.destroy()

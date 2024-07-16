@@ -49,7 +49,7 @@ class MyWindow(tk.Tk):
 
         # 標籤設計
         self.label = tk.Label(self.frame, text="波士頓房價", bg="lightblue", relief="raised", padx=20, pady=10)
-        self.label.pack(side="left", padx=(10, 0))
+        self.label.pack(side="left")
 
         # 按鈕設計，包括文字和向下箭頭圖案
         self.show_btn = tk.Button(self.frame, text="查看數據集 \u21E9", pady=5, command=self.show_data)

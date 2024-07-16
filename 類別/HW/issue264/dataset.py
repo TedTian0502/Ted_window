@@ -2,8 +2,7 @@ import pandas as pd
 
 def getInfo() -> pd.DataFrame:
     # 讀取 CSV 文件
-    file_path = 'C:/Git hub/Ted_window/波士頓房價預測/train_dataset.csv' #家裡筆電
-    # file_path = 'C:/Users/user/Documents/GitHub/Ted_window/波士頓房價預測/train_dataset.csv' #學校
+    file_path = 'train_dataset.csv'
     try:
         rowdata = pd.read_csv(file_path)
     except FileNotFoundError:

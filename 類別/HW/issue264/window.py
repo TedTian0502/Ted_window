@@ -5,7 +5,9 @@ import numpy as np       #數學處理
 import pandas as pd       #資料處理
 import matplotlib.pyplot as plt #繪圖
 import seaborn as sns
-from tkinter import filedialog
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from PIL import Image, ImageTk
+import analysis
 
 # cd 波士頓房價預測
 
@@ -16,17 +18,19 @@ df = getInfo()
 if df.empty:
     print("無法載入資料集，請檢查文件路徑。")
     exit()
-# =================================================
 
+# 我對Python程式設計和GUI開發方面，以及數據分析和機器學習領域的專案，非常有興趣和專業要求，請使用"繁體中文"回答我的問題
+# =================================================
+#備註:圖表內容要有描述
 class MyWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.option_add('*font', ('Tahoma', 15, 'bold'))
         self.title("波士頓房價預測")
-        self.geometry("800x600")
+        self.geometry("800x620")
         
         # 呼叫函數以居中視窗
-        self.center_window(800, 600)
+        self.center_window(800, 620)
 
         self.create_widgets()
 
@@ -49,20 +53,20 @@ class MyWindow(tk.Tk):
         self.label.pack(side="left")
 
         # combobox設計
-        self.combobox = ttk.Combobox(self.frame, values=["查看數據分佈", "選項二", "選項三"], state="readonly")
-        self.combobox.set("請選擇圖表")
+        self.combobox = ttk.Combobox(self.frame, values=["數據一", "數據二", "數據三"], state="readonly")
+        self.combobox.set("請選擇圖表:")
         self.combobox.pack(side="left", padx=(5, 0))
 
         # 按鈕設計，包括文字和向下箭頭圖案
-        self.show_btn = tk.Button(self.frame, text="查看數據集 \u21E9", pady=5, command=self.show_data)
+        self.show_btn = tk.Button(self.frame, text="查看資料 \u21E9", pady=5, font=('Tahoma', 12,'bold'), command=self.show_data, relief="raised", borderwidth=5)
         self.show_btn.pack(side="left", padx=(5, 0))
 
         # 恢復初始狀態按鈕
-        self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=('Tahoma', 10), command=self.reset_data)
+        self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=('Tahoma', 12,'bold'), command=self.reset_data, relief="raised", borderwidth=5)
         self.reset_btn.pack(side="left", padx=(5, 10))
 
         # 新增按鈕 "評分"
-        self.open_options_btn = tk.Button(self.frame, text="評分", pady=5, command=self.show_rating_dialog)
+        self.open_options_btn = tk.Button(self.frame, text="評分", pady=5, font=('Tahoma', 12,'bold'), command=self.show_rating_dialog, relief="raised", borderwidth=5)
         self.open_options_btn.pack(side="left")
 
         # 添加背景框架，並填充視窗下方
@@ -83,22 +87,29 @@ class MyWindow(tk.Tk):
 
     def show_data(self):
         selected_option = self.combobox.get()
-        if selected_option == "請選擇圖表":
+        if selected_option == "請選擇圖表:":
             messagebox.showwarning("警告", "請先選擇一個選項")
             return
         
-        if selected_option == "查看數據分佈":
+        if selected_option == "數據一":
             if self.tree1 is None:
                 self.create_treeview1()
             if self.tree2 is None:
                 self.create_treeview2()
-        # 可以根據其他選項添加對應的顯示邏輯
-        # elif selected_option == "選項二":
-        #     pass
+        elif selected_option == "數據二":
+            self.show_data_window()
+        elif selected_option == "數據三":
+            self.show_additional_data_window()
 
     def create_treeview1(self):
+        self.destroy_treeview1()
+
         self.tree_frame1 = tk.Frame(self.background_frame)
-        self.tree_frame1.pack(pady=20, padx=(10, 370))
+        self.tree_frame1.pack(pady=10, padx=(10, 370))
+
+        # 新增treeview標籤1
+        self.label1 = tk.Label(self.tree_frame1, text="資料集", padx=20)
+        self.label1.pack(side="top")
 
         self.tree1 = ttk.Treeview(self.tree_frame1, columns=("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"), show="headings")
 
@@ -127,8 +138,14 @@ class MyWindow(tk.Tk):
             print("找不到指定的 CSV 檔案。")
 
     def create_treeview2(self):
+        self.destroy_treeview2()
+
         self.tree_frame2 = tk.Frame(self.background_frame)
-        self.tree_frame2.pack(pady=20, padx=(10, 370), fill="both", expand=True)
+        self.tree_frame2.pack(pady=10, padx=(10, 370), fill="both", expand=True)
+
+        # 新增treeview標籤2
+        self.label2 = tk.Label(self.tree_frame2, text="敘述統計", padx=20)
+        self.label2.pack(side="top")
 
         self.tree2 = ttk.Treeview(self.tree_frame2, columns=("Statistic", "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"), show="headings")
 
@@ -161,33 +178,105 @@ class MyWindow(tk.Tk):
     def reset_data(self):
         self.destroy_treeview1()
         self.destroy_treeview2()
-        self.combobox.set("請選擇圖表")
+
+        # 將 combobox 設置為初始值 "請選擇圖表"
+        self.combobox.set("請選擇圖表:")
 
     def destroy_treeview1(self):
-        if self.tree_frame1:
-            for widget in self.tree_frame1.winfo_children():
-                widget.destroy()
+        if self.tree_frame1 is not None:
             self.tree_frame1.destroy()
-            self.tree1 = None
             self.tree_frame1 = None
+            self.tree1 = None
 
     def destroy_treeview2(self):
-        if self.tree_frame2:
-            for widget in self.tree_frame2.winfo_children():
-                widget.destroy()
+        if self.tree_frame2 is not None:
             self.tree_frame2.destroy()
-            self.tree2 = None
             self.tree_frame2 = None
+            self.tree2 = None
 
-    def show_rating_dialog(self):
-        messagebox.showinfo("分數", "準確率為: XXX")
+    def show_data_window(self):
+        new_window = tk.Toplevel(self)
+        new_window.title("數據二")
+        new_window.geometry("650x450")
+
+        try:
+            # 圖表描述標籤
+            chart_label = tk.Label(new_window, text="缺失值處理 與 合鬚圖", font=('Tahoma', 15, 'bold'))
+            chart_label.pack(side=tk.TOP, pady=5)    
+
+            # 圖片1
+            image_path1 = "C:/Git hub/Ted_window/波士頓房價預測/images/image_1.png"
+            image1 = Image.open(image_path1)
+            image1 = image1.resize((250, 400), Image.LANCZOS)
+            photo1 = ImageTk.PhotoImage(image1)
+
+            label1 = tk.Label(new_window, image=photo1)
+            label1.image = photo1  # 保持對圖像的引用
+            label1.pack(side=tk.LEFT, padx=(10,5), pady=5)
+
+            # 圖片2
+            image_path2 = "C:/Git hub/Ted_window/波士頓房價預測/images/image_2.png"
+            image2 = Image.open(image_path2)
+            image2 = image2.resize((350, 400), Image.LANCZOS)
+            photo2 = ImageTk.PhotoImage(image2)
+
+            label2 = tk.Label(new_window, image=photo2)
+            label2.image = photo2  # 保持對圖像的引用
+            label2.pack(side=tk.LEFT, padx=(5,10), pady=5)
+        except FileNotFoundError as e:
+            messagebox.showerror("錯誤", f"找不到指定的圖片檔案：{e}")
+
+    def show_additional_data_window(self):
+        new_window = tk.Toplevel(self)
+        new_window.title("數據三")
+        new_window.geometry("850x420")
+
+        try:
+            # 圖表描述標籤
+            chart_label = tk.Label(new_window, text="常態分佈圖 與 熱力圖", font=('Tahoma', 15, 'bold'))
+            chart_label.pack(side=tk.TOP, pady=5)
+
+            # 圖片3
+            image_path3 = "C:/Git hub/Ted_window/波士頓房價預測/images/image_3.png"
+            image3 = Image.open(image_path3)
+            image3 = image3.resize((400, 400), Image.LANCZOS)
+            photo3 = ImageTk.PhotoImage(image3)
+
+            label3 = tk.Label(new_window, image=photo3)
+            label3.image = photo3  # 保持對圖像的引用
+            label3.pack(side=tk.LEFT, padx=(10,5), pady=5)
+
+            # 圖片4
+            image_path4 = "C:/Git hub/Ted_window/波士頓房價預測/images/image_4.png"
+            image4 = Image.open(image_path4)
+            image4 = image4.resize((420, 400), Image.LANCZOS)
+            photo4 = ImageTk.PhotoImage(image4)
+
+            label4 = tk.Label(new_window, image=photo4)
+            label4.image = photo4  # 保持對圖像的引用
+            label4.pack(side=tk.RIGHT, padx=(5,10), pady=5)
+
+        except FileNotFoundError as e:
+            messagebox.showerror("錯誤", f"找不到指定的圖片檔案：{e}")
 
     def on_close(self):
-        self.destroy()
+        if messagebox.askokcancel("退出", "確定要退出嗎？"):
+            self.destroy()
 
-    def run(self):
-        self.mainloop()
+    def show_rating_dialog(self):
+        # 準備要顯示的準確率數據
+        knn_accuracy = analysis.max_knn_accuracy
+        gs_accuracy = analysis.max_gs_accuracy
+        dec_accuracy = analysis.max_dec_accuracy
+
+        # 構建消息框顯示內容
+        message = f"K近鄰模組_準確率：{knn_accuracy}\n\n"
+        message += f"GridSearchCV網格搜索模組_準確率：{gs_accuracy}\n\n"
+        message += f"決策樹分析_準確率：{dec_accuracy}"
+
+        # 使用消息框顯示準確率
+        messagebox.showinfo("模型準確率", message)
 
 if __name__ == "__main__":
-    app = MyWindow()
-    app.run()
+    window = MyWindow()
+    window.mainloop()

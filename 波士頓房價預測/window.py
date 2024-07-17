@@ -54,7 +54,7 @@ class MyWindow(tk.Tk):
 
         # combobox設計
         self.combobox = ttk.Combobox(self.frame, values=["數據一", "數據二", "數據三"], state="readonly")
-        self.combobox.set("請選擇圖表")
+        self.combobox.set("請選擇圖表:")
         self.combobox.pack(side="left", padx=(5, 0))
 
         # 按鈕設計，包括文字和向下箭頭圖案
@@ -87,7 +87,7 @@ class MyWindow(tk.Tk):
 
     def show_data(self):
         selected_option = self.combobox.get()
-        if selected_option == "請選擇圖表":
+        if selected_option == "請選擇圖表:":
             messagebox.showwarning("警告", "請先選擇一個選項")
             return
         
@@ -178,6 +178,9 @@ class MyWindow(tk.Tk):
     def reset_data(self):
         self.destroy_treeview1()
         self.destroy_treeview2()
+
+        # 將 combobox 設置為初始值 "請選擇圖表"
+        self.combobox.set("請選擇圖表:")
 
     def destroy_treeview1(self):
         if self.tree_frame1 is not None:

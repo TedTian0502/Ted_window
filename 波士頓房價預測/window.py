@@ -5,7 +5,6 @@ import numpy as np       #數學處理
 import pandas as pd       #資料處理
 import matplotlib.pyplot as plt #繪圖
 import seaborn as sns
-from tkinter import filedialog
 
 # cd 波士頓房價預測
 
@@ -17,16 +16,16 @@ if df.empty:
     print("無法載入資料集，請檢查文件路徑。")
     exit()
 # =================================================
-
+#備註:圖表內容要有描述
 class MyWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.option_add('*font', ('Tahoma', 15, 'bold'))
         self.title("波士頓房價預測")
-        self.geometry("800x600")
+        self.geometry("800x620")
         
         # 呼叫函數以居中視窗
-        self.center_window(800, 600)
+        self.center_window(800, 620)
 
         self.create_widgets()
 
@@ -49,7 +48,7 @@ class MyWindow(tk.Tk):
         self.label.pack(side="left")
 
         # combobox設計
-        self.combobox = ttk.Combobox(self.frame, values=["查看數據分佈", "選項二", "選項三"], state="readonly")
+        self.combobox = ttk.Combobox(self.frame, values=["數據一", "選項二", "選項三"], state="readonly")
         self.combobox.set("請選擇圖表")
         self.combobox.pack(side="left", padx=(5, 0))
 
@@ -87,7 +86,7 @@ class MyWindow(tk.Tk):
             messagebox.showwarning("警告", "請先選擇一個選項")
             return
         
-        if selected_option == "查看數據分佈":
+        if selected_option == "數據一":
             if self.tree1 is None:
                 self.create_treeview1()
             if self.tree2 is None:
@@ -98,7 +97,11 @@ class MyWindow(tk.Tk):
 
     def create_treeview1(self):
         self.tree_frame1 = tk.Frame(self.background_frame)
-        self.tree_frame1.pack(pady=20, padx=(10, 370))
+        self.tree_frame1.pack(pady=10, padx=(10, 370))
+
+        # 新增treeview標籤1
+        self.label1 = tk.Label(self.tree_frame1, text="資料集", padx=20)
+        self.label1.pack(side="top")
 
         self.tree1 = ttk.Treeview(self.tree_frame1, columns=("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"), show="headings")
 
@@ -128,7 +131,11 @@ class MyWindow(tk.Tk):
 
     def create_treeview2(self):
         self.tree_frame2 = tk.Frame(self.background_frame)
-        self.tree_frame2.pack(pady=20, padx=(10, 370), fill="both", expand=True)
+        self.tree_frame2.pack(pady=10, padx=(10, 370), fill="both", expand=True)
+
+        # 新增treeview標籤2
+        self.label2 = tk.Label(self.tree_frame2, text="敘述統計", padx=20)
+        self.label2.pack(side="top")
 
         self.tree2 = ttk.Treeview(self.tree_frame2, columns=("Statistic", "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE"), show="headings")
 

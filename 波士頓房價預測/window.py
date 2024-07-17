@@ -54,15 +54,15 @@ class MyWindow(tk.Tk):
         self.combobox.pack(side="left", padx=(5, 0))
 
         # 按鈕設計，包括文字和向下箭頭圖案
-        self.show_btn = tk.Button(self.frame, text="查看數據集 \u21E9", pady=5, command=self.show_data)
+        self.show_btn = tk.Button(self.frame, text="查看資料 \u21E9", pady=5,font=('Tahoma', 12,'bold'), command=self.show_data,relief="raised",borderwidth=5)
         self.show_btn.pack(side="left", padx=(5, 0))
 
         # 恢復初始狀態按鈕
-        self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=('Tahoma', 10), command=self.reset_data)
+        self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=('Tahoma', 12,'bold'), command=self.reset_data,relief="raised",borderwidth=5)
         self.reset_btn.pack(side="left", padx=(5, 10))
 
         # 新增按鈕 "評分"
-        self.open_options_btn = tk.Button(self.frame, text="評分", pady=5, command=self.show_rating_dialog)
+        self.open_options_btn = tk.Button(self.frame, text="評分", pady=5,font=('Tahoma', 12,'bold'), command=self.show_rating_dialog,relief="raised",borderwidth=5)
         self.open_options_btn.pack(side="left")
 
         # 添加背景框架，並填充視窗下方

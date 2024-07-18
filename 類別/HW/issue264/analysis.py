@@ -61,3 +61,5 @@ for i in range(5):
 print(f"K近鄰模組_準確率：{max_knn_accuracy}")
 print(f"GridSearchCV網格搜索模組_準確率：{max_gs_accuracy}")
 print(f"決策樹分析_準確率：{max_dec_accuracy}")
+
+# =================================================================

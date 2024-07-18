@@ -54,4 +54,4 @@ PRICE: 房屋價格的中位數
 
 ---
 
-### [影片連結]()
+### [影片連結](https://youtu.be/7XZ0tEzBzfE)

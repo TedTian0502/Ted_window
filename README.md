@@ -71,3 +71,6 @@ flask --app main run --debug
 5.Deploy Web Service等待"Live"
 6.更新內容->Events ->Delopy ->等待更新動作，直到"Live"
 7.網址可以貼到手機查看內容
+
+### 0718
+上網搜尋更新下載:剪取工具slipping tool

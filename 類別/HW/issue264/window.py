@@ -205,7 +205,7 @@ class MyWindow(tk.Tk):
             chart_label.pack(side=tk.TOP, pady=5)    
 
             # 圖片1
-            image_path1 = "C:\Git hub\Ted_window\類別\HW\issue264\images\image_1.png"
+            image_path1 = r"C:\Users\user\Documents\GitHub\Ted_window\類別\HW\issue264\images\image_1.png"
             image1 = Image.open(image_path1)
             image1 = image1.resize((250, 400), Image.LANCZOS)
             photo1 = ImageTk.PhotoImage(image1)
@@ -215,7 +215,7 @@ class MyWindow(tk.Tk):
             label1.pack(side=tk.LEFT, padx=(10,5), pady=5)
 
             # 圖片2
-            image_path2 = "C:\Git hub\Ted_window\類別\HW\issue264\images\image_2.png"
+            image_path2 = r"C:\Users\user\Documents\GitHub\Ted_window\類別\HW\issue264\images\image_2.png"
             image2 = Image.open(image_path2)
             image2 = image2.resize((350, 400), Image.LANCZOS)
             photo2 = ImageTk.PhotoImage(image2)
@@ -237,7 +237,7 @@ class MyWindow(tk.Tk):
             chart_label.pack(side=tk.TOP, pady=5)
 
             # 圖片3
-            image_path3 = "C:\Git hub\Ted_window\類別\HW\issue264\images\image_3.png"
+            image_path3 = r"C:\Users\user\Documents\GitHub\Ted_window\類別\HW\issue264\images\image_3.png"
             image3 = Image.open(image_path3)
             image3 = image3.resize((400, 360), Image.LANCZOS)
             photo3 = ImageTk.PhotoImage(image3)
@@ -247,7 +247,7 @@ class MyWindow(tk.Tk):
             label3.pack(side=tk.LEFT, padx=(10,5), pady=5)
 
             # 圖片4
-            image_path4 = "C:\Git hub\Ted_window\類別\HW\issue264\images\image_4.png"
+            image_path4 = r"C:\Users\user\Documents\GitHub\Ted_window\類別\HW\issue264\images\image_4.png"
             image4 = Image.open(image_path4)
             image4 = image4.resize((420, 360), Image.LANCZOS)
             photo4 = ImageTk.PhotoImage(image4)

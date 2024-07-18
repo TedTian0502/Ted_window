@@ -62,15 +62,15 @@ flask --app main run --debug
 3.錄影時間不要超過3min
 
 ### 0715
---Render 2024_Ted_window建立:網頁站點搜尋
-1.+New ->Web Service ->Connect ->Ex:TedTian0502/Ted_window
-2.變更Name
-3.Start Command ->gunicorn
-4.Environments Variables ->NAME_OF_VARIABLE: POSTGRESQL_TOKEN
-->value: "Internal Database URL"
-5.Deploy Web Service等待"Live"
-6.更新內容->Events ->Delopy ->等待更新動作，直到"Live"
-7.網址可以貼到手機查看內容
+--Render 2024_Ted_window建立:網頁站點搜尋  
+1.+New ->Web Service ->Connect ->Ex:TedTian0502/Ted_window  
+2.變更Name  
+3.Start Command ->gunicorn  
+4.Environments Variables ->NAME_OF_VARIABLE: POSTGRESQL_TOKEN  
+->value: "Internal Database URL"  
+5.Deploy Web Service等待"Live"  
+6.更新內容->Events ->Delopy ->等待更新動作，直到"Live"  
+7.網址可以貼到手機查看內容  
 
 ### 0718
 上網搜尋更新下載:剪取工具slipping tool
@@ -78,3 +78,5 @@ flask --app main run --debug
 重新錄製影片
 
 [參考資料: Pyinstaller](https://medium.com/pyladies-taiwan/python-%E5%B0%87python%E6%89%93%E5%8C%85%E6%88%90exe%E6%AA%94-32a4bacbe351)
+
+Web作業:繳交至網站上面

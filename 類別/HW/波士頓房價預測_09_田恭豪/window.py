@@ -24,7 +24,7 @@ if df.empty:
 # 我對Python程式設計和GUI開發方面，以及數據分析和機器學習領域的專案，非常有興趣和專業要求，請使用"繁體中文"回答我的問題
 # =================================================
 #備註:圖表內容要有描述
-#grid: 吃self 的 tk.label
+#grid: 在self.frame底下 的 tk.label才可以改成grid，座標(0,0):左上角，(1,0)往右移一格
 class MyWindow(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -111,7 +111,7 @@ class MyWindow(tk.Tk):
                 # 將 PhotoImage 放入 Label 以顯示在窗口中
                 self.label = tk.Label(self.background_frame, image=photo)
                 self.label.image = photo  # 保持對圖像的引用
-                self.label.grid(padx=(1500,0), pady=20)  # 調整 Label 的位置和間距
+                self.label.pack(padx=(1000,0), pady=20)  # 調整 Label 的位置和間距
 
             except FileNotFoundError:
                 print("找不到指定的 CSV 檔案。")

@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt #繪圖
 import seaborn as sns
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
-import 類別.HW.波士頓房價預測_09_田恭豪.chart.analysis as analysis
+import chart.analysis as analysis
+import chart.analysis2 as analysis2
+
 
 # cd 波士頓房價預測
 
@@ -22,6 +24,7 @@ if df.empty:
 # 我對Python程式設計和GUI開發方面，以及數據分析和機器學習領域的專案，非常有興趣和專業要求，請使用"繁體中文"回答我的問題
 # =================================================
 #備註:圖表內容要有描述
+#grid: 吃self 的 tk.label
 class MyWindow(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -96,6 +99,23 @@ class MyWindow(tk.Tk):
                 self.create_treeview1()
             if self.tree2 is None:
                 self.create_treeview2()
+            # 顯示合鬚圖
+            try:
+                data = pd.read_csv('train_dataset.csv')
+                photo = analysis2.plot_boxplot(data)  # 獲取合鬚圖的 PhotoImage 對象
+                
+                # 清理舊的圖片
+                if hasattr(self, 'label'):
+                    self.label.pack_forget()
+
+                # 將 PhotoImage 放入 Label 以顯示在窗口中
+                self.label = tk.Label(self.background_frame, image=photo)
+                self.label.image = photo  # 保持對圖像的引用
+                self.label.grid(padx=(1500,0), pady=20)  # 調整 Label 的位置和間距
+
+            except FileNotFoundError:
+                print("找不到指定的 CSV 檔案。")
+
         elif selected_option == "數據二":
             self.show_data_window()
         elif selected_option == "數據三":

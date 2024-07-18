@@ -3,10 +3,10 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error, r2_score
+# from sklearn.metrics import mean_squared_error, r2_score
 
 # 讀取數據集
-data = pd.read_csv('train_dataset.csv')
+data = pd.read_csv('C:/Users/user/Documents/GitHub/Ted_window/類別/HW/波士頓房價預測_09_田恭豪/train_dataset.csv')
 
 # 假設 'selectedFeatures' 包含你要選取的欄位名稱：
 selectedFeatures = ['LSTAT', 'RM']  # 更換成你實際的欄位名稱

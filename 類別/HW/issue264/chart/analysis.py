@@ -3,7 +3,6 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
-import matplotlib.pyplot as plt #繪圖
 
 # 讀取數據集
 data = pd.read_csv('train_dataset.csv')
@@ -63,16 +62,3 @@ print(f"GridSearchCV網格搜索模組_準確率：{max_gs_accuracy}")
 print(f"決策樹分析_準確率：{max_dec_accuracy}")
 
 # =================================================================
-# 合鬚圖
-# 求出四分位距(IQR)=Q3-Q1與上邊界(天花板)和下邊界(地板)
-Q1=data['PRICE'].quantile(0.25)
-Q3=data['PRICE'].quantile(0.75)
-IQR=Q3-Q1
-Upper=Q3+1.5*IQR
-Lower=Q1-1.5*IQR
-print('Q3=',Q3,'Q1=',Q1,'IQR=',IQR,'Upper=',Upper,'Lower=',Lower)
-
-plt.figure(figsize=(3,5))
-plt.boxplot(d['PRICE'],showmeans=True)
-plt.title('PRICE')
-plt.show()

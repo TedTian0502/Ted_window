@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt #繪圖
 import seaborn as sns
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
-import analysis
+import 類別.HW.波士頓房價預測_09_田恭豪.chart.analysis as analysis
 
 # cd 波士頓房價預測
 

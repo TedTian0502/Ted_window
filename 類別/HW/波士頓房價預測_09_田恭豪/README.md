@@ -22,18 +22,17 @@
 ![picture_1](./images/window_1.png)
 ### 2.下拉式選單
 ![picture_1](./images/window_2.png)
-### 3.數據一
+### 3.資料前處理
 ![picture_1](./images/window_3.png)
-### 4.移除數據一按鈕
+### 4.特徵變數，閾值最初設為 0.4 得到的特徵變數
 ![picture_1](./images/window_4.png)
-### 5.數據二內容
+### 5.特徵變數，輸入閾值 0.51 得到特徵變數"RM"、"LSTAT"
 ![picture_1](./images/window_5.png)
-### 6.數據三內容
+### 6.閾值為 0.51 模型分數
 ![picture_1](./images/window_6.png)
-### 7.模型分數
+### 7.離開前提醒
 ![picture_1](./images/window_7.png)
-### 8.離開前提醒
-![picture_1](./images/window_8.png)
+
 ---
 
 ### 欄位名稱說明

@@ -24,6 +24,10 @@
 ![picture_1](./images/window_2.png)
 ### 3.資料前處理
 ![picture_1](./images/window_3.png)
+
+備註:   
+偏態(Skewness): -0.04  (選擇不處理離群值)  
+峰度(Kurtosis): 0.07 
 ### 4.特徵變數，閾值最初設為 0.4 得到的特徵變數
 ![picture_1](./images/window_4.png)
 ### 5.特徵變數，輸入閾值 0.51 得到特徵變數"RM"、"LSTAT"

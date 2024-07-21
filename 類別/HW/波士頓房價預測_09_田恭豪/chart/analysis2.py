@@ -27,7 +27,7 @@ def plot_missing_values(data):
     pil_image = Image.frombytes('RGBA', canvas.get_width_height(), canvas.buffer_rgba())
 
     # 調整圖片大小
-    pil_image = pil_image.resize((400, 300), Image.LANCZOS)
+    pil_image = pil_image.resize((400, 350), Image.LANCZOS)
 
     plt.close(fig)  # 關閉圖表，釋放資源
     return pil_image
@@ -54,7 +54,7 @@ def plot_boxplot(data):
     pil_image = Image.frombytes('RGBA', canvas.get_width_height(), canvas.buffer_rgba())
 
     # 調整圖片大小
-    pil_image = pil_image.resize((400, 300), Image.LANCZOS)
+    pil_image = pil_image.resize((400, 350), Image.LANCZOS)
 
     plt.close(fig)  # 關閉圖表，釋放資源
     return pil_image
@@ -73,7 +73,7 @@ def plot_normal_distribution(data):
     pil_image = Image.frombytes('RGBA', canvas.get_width_height(), canvas.buffer_rgba())
 
     # 調整圖片大小
-    pil_image = pil_image.resize((400, 300), Image.LANCZOS)
+    pil_image = pil_image.resize((400, 350), Image.LANCZOS)
 
     plt.close(fig)  # 關閉圖表，釋放資源
     return pil_image
@@ -85,7 +85,7 @@ def show_plots_in_window(window):
 
     try:
         data = pd.read_csv(dataset_path)
-        print("成功載入資料.")
+        print("成功載入資料2")
     except FileNotFoundError:
         print(f"找不到檔案: {dataset_path}")
         return

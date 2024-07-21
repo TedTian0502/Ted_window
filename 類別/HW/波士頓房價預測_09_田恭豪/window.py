@@ -210,7 +210,7 @@ class MyWindow(tk.Tk):
     def show_data_one_window(self):
         new_window = Toplevel(self)
         new_window.title("數據一")
-        new_window.geometry("1250x350")
+        new_window.geometry("1250x400")
 
         # 呼叫分析函數以顯示圖表
         analysis2.show_plots_in_window(new_window)

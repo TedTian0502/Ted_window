@@ -46,10 +46,14 @@ class MyWindow(tk.Tk):
         # 設置窗口關閉時的處理
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
+        # 在應用程式啟動時顯示 treeview1 和 treeview2
+        self.create_treeview1()
+        self.create_treeview2()
+
     def create_widgets(self):
         # 創建框架放置標籤和按鈕
         self.frame = tk.Frame(self)
-        self.frame.pack(anchor="nw", padx=5, pady=5)
+        self.frame.pack(anchor="nw", padx=5, pady=5, fill='x')
 
         # 標籤設計
         self.label = tk.Label(self.frame, text="波士頓房價", bg="lightblue", relief="raised", padx=20, pady=10)
@@ -61,20 +65,28 @@ class MyWindow(tk.Tk):
         self.combobox.pack(side="left", padx=(5, 0))
 
         # 按鈕設計，包括文字和向下箭頭圖案
-        self.show_btn = tk.Button(self.frame, text="查看資料 \u21E9", pady=5, font=('Tahoma', 12,'bold'), command=self.show_data, relief="raised", borderwidth=5)
+        self.show_btn = tk.Button(self.frame, text="查看資料 \u21E9", pady=5, font=('Tahoma', 12, 'bold'), command=self.show_data, relief="raised", borderwidth=5)
         self.show_btn.pack(side="left", padx=(5, 0))
 
         # 恢復初始狀態按鈕
-        self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=('Tahoma', 12,'bold'), command=self.reset_data, relief="raised", borderwidth=5)
+        self.reset_btn = tk.Button(self.frame, text="恢復初始狀態", pady=5, font=('Tahoma', 12, 'bold'), command=self.reset_data, relief="raised", borderwidth=5)
         self.reset_btn.pack(side="left", padx=(5, 10))
 
         # 新增按鈕 "評分"
-        self.open_options_btn = tk.Button(self.frame, text="評分", pady=5, font=('Tahoma', 12,'bold'), command=self.show_rating_dialog, relief="raised", borderwidth=5)
+        self.open_options_btn = tk.Button(self.frame, text="評分", pady=5, font=('Tahoma', 12, 'bold'), command=self.show_rating_dialog, relief="raised", borderwidth=5)
         self.open_options_btn.pack(side="left")
 
         # 添加背景框架，並填充視窗下方
         self.background_frame = tk.Frame(self, bg="#FBF6E2")
-        self.background_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        self.background_frame.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+
+        # 設置右側文字框架
+        self.right_frame = tk.Frame(self, bg="lightgrey", padx=10, pady=10)
+        self.right_frame.pack(side="right", fill="y", padx=5, pady=5, ipadx=10)
+
+        # 添加文字內容
+        self.info_label = tk.Label(self.right_frame, text="這裡是右側的文字內容區域。", bg="lightgrey", font=('Arial', 12))
+        self.info_label.pack(pady=10)
 
     def center_window(self, width=800, height=600):
         # 取得螢幕的寬度和高度
@@ -95,27 +107,7 @@ class MyWindow(tk.Tk):
             return
         
         if selected_option == "數據一":
-            if self.tree1 is None:
-                self.create_treeview1()
-            if self.tree2 is None:
-                self.create_treeview2()
-            # 顯示合鬚圖
-            try:
-                data = pd.read_csv('train_dataset.csv')
-                photo = analysis2.plot_boxplot(data)  # 獲取合鬚圖的 PhotoImage 對象
-                
-                # 清理舊的圖片
-                if hasattr(self, 'label'):
-                    self.label.pack_forget()
-
-                # 將 PhotoImage 放入 Label 以顯示在窗口中
-                self.label = tk.Label(self.background_frame, image=photo)
-                self.label.image = photo  # 保持對圖像的引用
-                self.label.pack(padx=(1000,0), pady=20)  # 調整 Label 的位置和間距
-
-            except FileNotFoundError:
-                print("找不到指定的 CSV 檔案。")
-
+            self.show_data_one_window()
         elif selected_option == "數據二":
             self.show_data_window()
         elif selected_option == "數據三":
@@ -125,7 +117,7 @@ class MyWindow(tk.Tk):
         self.destroy_treeview1()
 
         self.tree_frame1 = tk.Frame(self.background_frame)
-        self.tree_frame1.pack(pady=10, padx=(10, 370))
+        self.tree_frame1.pack(pady=10, padx=10)
 
         # 新增treeview標籤1
         self.label1 = tk.Label(self.tree_frame1, text="資料集", padx=20)
@@ -161,7 +153,7 @@ class MyWindow(tk.Tk):
         self.destroy_treeview2()
 
         self.tree_frame2 = tk.Frame(self.background_frame)
-        self.tree_frame2.pack(pady=10, padx=(10, 370), fill="both", expand=True)
+        self.tree_frame2.pack(pady=10, padx=10)
 
         # 新增treeview標籤2
         self.label2 = tk.Label(self.tree_frame2, text="敘述統計", padx=20)
@@ -193,26 +185,43 @@ class MyWindow(tk.Tk):
                 values = [stat_name] + [stats.loc[stat_name, col] for col in ("CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD", "TAX", "PIRATIO", "B", "LSTAT", "PRICE")]
                 self.tree2.insert("", "end", values=values)
         except FileNotFoundError:
-            print("找不到指定的 CSV 檔案")
-
-    def reset_data(self):
-        self.destroy_treeview1()
-        self.destroy_treeview2()
-
-        # 將 combobox 設置為初始值 "請選擇圖表"
-        self.combobox.set("請選擇圖表:")
+            print("找不到指定的 CSV 檔案。")
 
     def destroy_treeview1(self):
-        if self.tree_frame1 is not None:
+        if self.tree_frame1:
             self.tree_frame1.destroy()
             self.tree_frame1 = None
             self.tree1 = None
 
     def destroy_treeview2(self):
-        if self.tree_frame2 is not None:
+        if self.tree_frame2:
             self.tree_frame2.destroy()
             self.tree_frame2 = None
             self.tree2 = None
+
+    def reset_data(self):
+        self.combobox.set("請選擇圖表:")
+        self.destroy_treeview1()
+        self.destroy_treeview2()
+        # 在恢復初始狀態時顯示 treeview1 和 treeview2
+        self.create_treeview1()
+        self.create_treeview2()
+
+    def show_data_one_window(self):
+        new_window = Toplevel(self)
+        new_window.title("數據一")
+        new_window.geometry("1250x350")
+
+        # 呼叫分析函數以顯示圖表
+        analysis2.show_plots_in_window(new_window)
+
+        try:
+            # 圖表描述標籤
+            chart_label = tk.Label(new_window, text="123", font=('Tahoma', 15, 'bold'))
+            chart_label.pack(side=tk.BOTTOM, pady=5)    
+
+        except FileNotFoundError as e:
+            messagebox.showerror("錯誤", f"找不到指定的圖片檔案：{e}")
 
     def show_data_window(self):
         new_window = tk.Toplevel(self)
@@ -221,28 +230,9 @@ class MyWindow(tk.Tk):
 
         try:
             # 圖表描述標籤
-            chart_label = tk.Label(new_window, text="缺失值處理 與 合鬚圖", font=('Tahoma', 15, 'bold'))
+            chart_label = tk.Label(new_window, text="圖表二", font=('Tahoma', 15, 'bold'))
             chart_label.pack(side=tk.TOP, pady=5)    
 
-            # 圖片1
-            image_path1 = r"C:\Users\user\Documents\GitHub\Ted_window\類別\HW\波士頓房價預測_09_田恭豪\images\image_1.png"
-            image1 = Image.open(image_path1)
-            image1 = image1.resize((250, 400), Image.LANCZOS)
-            photo1 = ImageTk.PhotoImage(image1)
-
-            label1 = tk.Label(new_window, image=photo1)
-            label1.image = photo1  # 保持對圖像的引用
-            label1.pack(side=tk.LEFT, padx=(10,5), pady=5)
-
-            # 圖片2
-            image_path2 = r"C:\Users\user\Documents\GitHub\Ted_window\類別\HW\波士頓房價預測_09_田恭豪\images\image_2.png"
-            image2 = Image.open(image_path2)
-            image2 = image2.resize((350, 400), Image.LANCZOS)
-            photo2 = ImageTk.PhotoImage(image2)
-
-            label2 = tk.Label(new_window, image=photo2)
-            label2.image = photo2  # 保持對圖像的引用
-            label2.pack(side=tk.LEFT, padx=(5,10), pady=5)
         except FileNotFoundError as e:
             messagebox.showerror("錯誤", f"找不到指定的圖片檔案：{e}")
 
@@ -253,28 +243,8 @@ class MyWindow(tk.Tk):
 
         try:
             # 圖表描述標籤
-            chart_label = tk.Label(new_window, text="常態分佈圖 與 熱力圖", font=('Tahoma', 15, 'bold'))
+            chart_label = tk.Label(new_window, text="圖表三", font=('Tahoma', 15, 'bold'))
             chart_label.pack(side=tk.TOP, pady=5)
-
-            # 圖片3
-            image_path3 = r"C:\Users\user\Documents\GitHub\Ted_window\類別\HW\波士頓房價預測_09_田恭豪\images\image_3.png"
-            image3 = Image.open(image_path3)
-            image3 = image3.resize((400, 360), Image.LANCZOS)
-            photo3 = ImageTk.PhotoImage(image3)
-
-            label3 = tk.Label(new_window, image=photo3)
-            label3.image = photo3  # 保持對圖像的引用
-            label3.pack(side=tk.LEFT, padx=(10,5), pady=5)
-
-            # 圖片4
-            image_path4 = r"C:\Users\user\Documents\GitHub\Ted_window\類別\HW\波士頓房價預測_09_田恭豪\images\image_4.png"
-            image4 = Image.open(image_path4)
-            image4 = image4.resize((420, 360), Image.LANCZOS)
-            photo4 = ImageTk.PhotoImage(image4)
-
-            label4 = tk.Label(new_window, image=photo4)
-            label4.image = photo4  # 保持對圖像的引用
-            label4.pack(side=tk.RIGHT, padx=(5,10), pady=5)
 
         except FileNotFoundError as e:
             messagebox.showerror("錯誤", f"找不到指定的圖片檔案：{e}")

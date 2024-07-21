@@ -1,12 +1,29 @@
 import pandas as pd
+import os
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 # from sklearn.metrics import mean_squared_error, r2_score
 
-# 讀取數據集
-data = pd.read_csv('C:/Users/user/Documents/GitHub/Ted_window/類別/HW/波士頓房價預測_09_田恭豪/train_dataset.csv')
+# 獲取當前腳本的目錄路徑
+script_dir = os.path.dirname(__file__)
+
+# 構造 train_dataset.csv 的相對路徑
+relative_path = os.path.join('..', 'train_dataset.csv')
+dataset_path = os.path.abspath(os.path.join(script_dir, relative_path))
+
+# 嘗試讀取 CSV 檔案
+try:
+    data = pd.read_csv(dataset_path)
+    # 繼續進行資料處理
+    print("成功載入資料.")
+except FileNotFoundError:
+    print(f"找不到檔案: {dataset_path}")
+except Exception as e:
+    print(f"發生錯誤: {e}")
+
+# -----------------------------------------------------------
 
 # 假設 'selectedFeatures' 包含你要選取的欄位名稱：
 selectedFeatures = ['LSTAT', 'RM']  # 更換成你實際的欄位名稱

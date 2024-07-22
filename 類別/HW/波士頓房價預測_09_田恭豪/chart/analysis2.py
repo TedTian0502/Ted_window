@@ -85,7 +85,7 @@ def show_plots_in_window(window):
 
     try:
         data = pd.read_csv(dataset_path)
-        print("成功載入資料2")
+        print("成功載入資料1")
     except FileNotFoundError:
         print(f"找不到檔案: {dataset_path}")
         return

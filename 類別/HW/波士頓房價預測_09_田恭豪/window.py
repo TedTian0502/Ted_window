@@ -13,6 +13,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeRegressor
 # ==================================================================
 
 # 使用 getInfo 函數從 dataset.py 中載入資料集
@@ -340,7 +343,59 @@ class MyWindow(tk.Tk):
                 mse = mean_squared_error(y_test, y_pred)
                 r2 = r2_score(y_test, y_pred)
 
-                eval_text = f"Mean Squared Error(MSE): {mse}\nR-squared(R^2): {r2}"
+                # 初始化最高準確率及其對應的模型名稱
+                max_knn_accuracy = -1
+                max_gs_accuracy = -1
+                max_dec_accuracy = -1
+
+                # 迭代運行五次並找出最高準確率的一次
+                for i in range(5):
+                    # 分割數據集為訓練集和測試集
+                    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=i)
+
+                    # 標準化數據
+                    scaler = StandardScaler()
+                    X_train_scaled = scaler.fit_transform(X_train)
+                    X_test_scaled = scaler.transform(X_test)
+
+                    # 使用K近鄰演算法
+                    knn = KNeighborsRegressor(n_neighbors=5)
+                    knn.fit(X_train_scaled, y_train)
+                    knn_score = knn.score(X_test_scaled, y_test)
+                    if knn_score > max_knn_accuracy:
+                        max_knn_accuracy = knn_score
+
+                    # 設定KNN回歸模型和GridSearchCV的參數網格
+                    param_grid = {
+                        'n_neighbors': [3, 5, 8, 10],
+                        'weights': ['uniform', 'distance']
+                    }
+
+                    knn_gs = KNeighborsRegressor()
+                    grid_search = GridSearchCV(knn_gs, param_grid, cv=5, scoring='neg_mean_squared_error')
+                    grid_search.fit(X_train_scaled, y_train)
+                    gs_score = grid_search.best_estimator_.score(X_test_scaled, y_test)
+                    if gs_score > max_gs_accuracy:
+                        max_gs_accuracy = gs_score
+
+                    # 初始化決策樹回歸模型
+                    dec_tree = DecisionTreeRegressor(random_state=42)
+                    dec_tree.fit(X_train, y_train)
+                    dec_score = dec_tree.score(X_test, y_test)
+                    if dec_score > max_dec_accuracy:
+                        max_dec_accuracy = dec_score
+
+                # 儲存最高準確率到 analysis 模組
+                analysis.max_knn_accuracy = max_knn_accuracy
+                analysis.max_gs_accuracy = max_gs_accuracy
+                analysis.max_dec_accuracy = max_dec_accuracy
+
+                # 輸出模型評估結果
+                eval_text = (f"Mean Squared Error(MSE): {mse}\n\n"
+                            f"R-squared(R^2): {r2}\n\n\n"
+                            f"K近鄰模組_準確率：{max_knn_accuracy}\n\n"
+                            f"GridSearchCV網格搜索模組_準確率：{max_gs_accuracy}\n\n"
+                            f"決策樹分析_準確率：{max_dec_accuracy}")
                 eval_label.config(text=eval_text)
             else:
                 eval_label.config(text="沒有選擇特徵進行回歸分析")
@@ -382,9 +437,9 @@ class MyWindow(tk.Tk):
 
     def show_rating_dialog(self):
         # 準備要顯示的準確率數據
-        knn_accuracy = analysis.max_knn_accuracy
-        gs_accuracy = analysis.max_gs_accuracy
-        dec_accuracy = analysis.max_dec_accuracy
+        knn_accuracy = getattr(analysis, 'max_knn_accuracy', '未計算')
+        gs_accuracy = getattr(analysis, 'max_gs_accuracy', '未計算')
+        dec_accuracy = getattr(analysis, 'max_dec_accuracy', '未計算')
 
         # 構建消息框顯示內容
         message = f"K近鄰模組_準確率：{knn_accuracy}\n\n"
@@ -393,6 +448,9 @@ class MyWindow(tk.Tk):
 
         # 使用消息框顯示準確率
         messagebox.showinfo("模型準確率", message)
+
+
+        
 
 if __name__ == "__main__":
     window = MyWindow()

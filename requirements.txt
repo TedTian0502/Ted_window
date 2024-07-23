@@ -8,3 +8,5 @@ pandas
 scipy
 seaborn
 graphviz
+python-dotenv
+psycopg2

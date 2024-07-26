@@ -80,3 +80,18 @@ flask --app main run --debug
 [參考資料: Pyinstaller](https://medium.com/pyladies-taiwan/python-%E5%B0%87python%E6%89%93%E5%8C%85%E6%88%90exe%E6%AA%94-32a4bacbe351)
 
 Web作業:繳交至網站上面
+
+### 0726
+1.把專案做到dash頁面，使用flask整合dash(css要做好)
+
+2.tvdi_postgreSQL重建
+2-1.建立新 postgreSQL(+NEW postgreSQL)
+2-2.複製:External Database URL:
+postgresql://
+tvdi_6p3c_user:
+password: gAPrDlskvZRHC29cZrYJoX5dBqZLRXFQ
+@dpg-cqhficg8fa8c73brl3lg-a.singapore-postgres.render.com/
+tvdi_6p3c
+2-3.開啟pgadmin 資料夾右鍵點選"properties"重新更改資料
+2-4.更改2024_07_02和之後有.env檔的:
+2-4-1.將.env之POSTGRESQL_TOKEN更改成新的External Database URL

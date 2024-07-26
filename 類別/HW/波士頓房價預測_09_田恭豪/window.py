@@ -271,7 +271,7 @@ class MyWindow(tk.Tk):
 
         # 創建用於顯示回歸評估結果的標籤
         eval_label = tk.Label(eval_frame, text="", bg='#508C9B', fg='white', font=('Arial', 12), justify='left')
-        eval_label.pack(padx=20, pady=20, anchor='nw')
+        eval_label.pack(padx=20, pady=(60,140), anchor='nw')
 
         # 定義查看選項的函數
         def view_options():

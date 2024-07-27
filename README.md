@@ -40,6 +40,9 @@ conda install --yes --file requirements.txt
 
 3.git clone (檔案的HTTPS)
 
+### 0624
+pgadmin與 render連結
+
 ### linux
 
 crontab -l

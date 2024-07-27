@@ -53,6 +53,7 @@ crontab -r
 
 venv1環境有問題
 
+#### 網頁框架:
 flask --app main run --debug
 
 ### 0711

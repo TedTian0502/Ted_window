@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import pandas as pd
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.serving import run_simple
@@ -35,6 +35,10 @@ def index():
 def full_data():
     df_html = df.to_html(classes='table table-striped')
     return render_template('full_data.html.jinja', table=df_html)
+
+@app.route('/images/<path:filename>')
+def images(filename):
+    return send_from_directory(os.path.join(os.getcwd(), 'dash_flask_web1/images'), filename)
 
 @app.route('/index1')
 def index1():

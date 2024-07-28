@@ -15,13 +15,9 @@
 
 
 {% block main%}
-<h3 class="mt-5">資料集內容</h3>
+<a href="{{ url_for('index') }}" class="btn btn-primary mt-3">返回</a>
+        <h3 class="mt-5">資料集內容</h3>
         <div class="table-responsive">
             {{ table | safe }}
         </div>
-        <h3 class="mt-5">敘述統計</h3>
-        <div class="table-responsive">
-            {{ desc | safe }}
-        </div>
-        <a href="{{ url_for('full_data') }}" class="btn btn-primary mt-3">查看所有內容</a>
 {% endblock %}

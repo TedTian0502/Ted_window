@@ -8,28 +8,35 @@ import data
 import dashboard
 import os
 
-app = Flask(__name__)
+# 設定資料集檔案的絕對路徑
+absolute_path = os.path.join(os.getcwd(), 'train_dataset.csv')
+
+# 檢查檔案是否存在
+if os.path.exists(absolute_path):
+    print("檔案存在")
+    df = pd.read_csv(absolute_path)
+else:
+    print("檔案不存在")
+    df = None
+
+app = Flask(__name__, template_folder='templates')
 application = DispatcherMiddleware(app, {
     "/dashboard/app1": app1.server,
     "/dashboard/app2": app2.server
 })
 
-@app.route("/")
+@app.route('/')
 def index():
-    # 檢查檔案是否存在
-    absolute_path = os.path.abspath('dash_flask_web1/train_dataset.csv')
-    print(f"檔案位置: {absolute_path}")
-    
-    # 讀取數據集
-    df = pd.read_csv(absolute_path)
-    # 獲取描述性統計信息
-    desc = df.describe()
-    # 將數據集和描述性統計信息轉換為HTML
-    df_html = df.to_html(classes='table table-striped')
-    desc_html = desc.to_html(classes='table table-striped')
-    return render_template('index.html', table=df_html, desc=desc_html)
+    df_html = df.head(10).to_html(classes='table table-striped')
+    desc_html = df.describe().to_html(classes='table table-striped')
+    return render_template('index.html.jinja', table=df_html, desc=desc_html)
 
-@app.route("/index1")
+@app.route('/full_data')
+def full_data():
+    df_html = df.to_html(classes='table table-striped')
+    return render_template('full_data.html.jinja', table=df_html)
+
+@app.route('/index1')
 def index1():
     selected_area = request.args.get('area')
     areas = [tup[0] for tup in data.get_areas()]

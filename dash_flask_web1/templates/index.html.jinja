@@ -15,5 +15,9 @@
 
 
 {% block main%}
-<h1>這是首頁123</h1>
+<h1 class="mt-5">資料集內容</h1>
+    <div>{{ table|safe }}</div>
+        
+<h2 class="mt-5">描述性統計信息</h2>
+    <div>{{ desc|safe }}</div>
 {% endblock %}

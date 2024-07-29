@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import pandas as pd
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.serving import run_simple
@@ -25,6 +25,16 @@ application = DispatcherMiddleware(app, {
     "/dashboard/app2": app2.server
 })
 
+# 圖標文件
+# @app.route('/favicon.ico')
+# def favicon():
+#     return send_from_directory(os.path.join(app.root_path, 'static/favicon.io'),
+#                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+# @app.route('/<path:filename>')
+# def static_files(filename):
+#     return send_from_directory(os.path.join(app.root_path, 'static/favicon.io'), filename)
+
 @app.route('/')
 def index():
     df_html = df.head(10).to_html(classes='table table-striped')
@@ -35,6 +45,10 @@ def index():
 def full_data():
     df_html = df.to_html(classes='table table-striped')
     return render_template('full_data.html.jinja', table=df_html)
+
+@app.route('/approach')
+def approach():
+    return render_template('approach.html.jinja')
 
 @app.route('/index1')
 def index1():

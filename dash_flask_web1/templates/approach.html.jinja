@@ -1,19 +1,28 @@
 {% extends 'base.html.jinja' %}
 
-{% block title%}
+{% block title %}
 {{ super() }} - 首頁
 {% endblock %}
 
-{% block head%}
+{% block head %}
 {{ super() }}
-<style type"text/css">
+<style type="text/css">
     body {
         background-color: white;
+        
+    }
+
+    .enlarged-image {
+        width: 800px;
+        /* 設定寬度 */
+        height: auto;
+        /* 自動調整高度以保持比例 */
+        image-rendering: auto;
+        /* 其他選項：crisp-edges, pixelated */
     }
 </style>
 {% endblock %}
 
-
-{% block main%}
-<img src="{{ url_for('static', filename='images/圖片1.png') }}" alt="Example Image">
+{% block main %}
+<img src="{{ url_for('static', filename='images/圖片1.png') }}" alt="Example Image" class="enlarged-image">
 {% endblock %}

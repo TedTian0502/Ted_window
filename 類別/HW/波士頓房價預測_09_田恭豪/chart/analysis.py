@@ -1,10 +1,12 @@
 import os
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_squared_error, r2_score
 
 # 獲取當前腳本的目錄路徑
 script_dir = os.path.dirname(__file__)
@@ -84,7 +86,20 @@ else:
         if dec_score > max_dec_accuracy:
             max_dec_accuracy = dec_score
 
-    # 輸出最高準確率
+    # 計算在容忍範圍內的正確比率
+    tolerance_percentage = 0.01  # 1%
+    tolerance_threshold = tolerance_percentage * np.abs(y_test)
+    absolute_errors = np.abs(knn.predict(X_test_scaled) - y_test)
+    correct_within_tolerance = np.mean(absolute_errors <= tolerance_threshold)
+
+    # 儲存最高準確率和容忍範圍內的正確比率到 analysis 模組
+    analysis.max_knn_accuracy = max_knn_accuracy
+    analysis.max_gs_accuracy = max_gs_accuracy
+    analysis.max_dec_accuracy = max_dec_accuracy
+    analysis.correct_within_tolerance = correct_within_tolerance
+
+    # 輸出最高準確率和容忍範圍內的正確比率
     print(f"K近鄰模組_準確率：{max_knn_accuracy}")
     print(f"GridSearchCV網格搜索模組_準確率：{max_gs_accuracy}")
     print(f"決策樹分析_準確率：{max_dec_accuracy}")
+    print(f"在容忍度 {tolerance_percentage * 100}% 範圍內的正確比率: {correct_within_tolerance:.2f}%")

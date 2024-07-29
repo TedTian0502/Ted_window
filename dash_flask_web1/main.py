@@ -2,9 +2,8 @@ from flask import Flask, render_template, request, send_from_directory
 import pandas as pd
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.serving import run_simple
-from dashboard.board1 import app1
-from dashboard.board2 import app2
-import data
+# from dashboard.board1 import app1
+# from dashboard.board2 import app2
 import dashboard
 import os
 
@@ -21,8 +20,8 @@ else:
 
 app = Flask(__name__, template_folder='templates')
 application = DispatcherMiddleware(app, {
-    "/dashboard/app1": app1.server,
-    "/dashboard/app2": app2.server
+    # "/dashboard/app1": app1.server,
+    # "/dashboard/app2": app2.server
 })
 
 # 圖標文件
@@ -50,14 +49,8 @@ def full_data():
 def approach():
     return render_template('approach.html.jinja')
 
-@app.route('/index1')
-def index1():
-    selected_area = request.args.get('area')
-    areas = [tup[0] for tup in data.get_areas()]
-    selected_area = '士林區' if selected_area is None else selected_area
-    detail_snaes = data.get_snaOfArea(area=selected_area)
-    
-    return render_template('index1.html.jinja', areas=areas, show_area=selected_area, detail_snaes=detail_snaes)
+# @app.route('/index1')
+# def index1():
 
 if __name__ == "__main__":
     run_simple("localhost", 7070, application, use_debugger=True, use_reloader=True)

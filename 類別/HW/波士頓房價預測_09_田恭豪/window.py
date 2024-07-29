@@ -302,7 +302,7 @@ class MyWindow(tk.Tk):
             # 在Tkinter窗口中顯示圖表
             canvas = FigureCanvasTkAgg(plt.gcf(), master=lower_left_frame)
             canvas.draw()
-            canvas.get_tk_widget().pack(side='top', fill='both', expand=True, padx=5, pady=(0,5))
+            canvas.get_tk_widget().pack(side='top', fill='both', expand=True, padx=5, pady=(0, 5))
 
             # 根據輸入的閾值x計算選擇特徵
             try:
@@ -343,6 +343,12 @@ class MyWindow(tk.Tk):
                 mse = mean_squared_error(y_test, y_pred)
                 r2 = r2_score(y_test, y_pred)
 
+                # 計算在容忍範圍內的正確比率
+                tolerance_percentage = 0.01  # 1%
+                tolerance_threshold = tolerance_percentage * np.abs(y_test)
+                absolute_errors = np.abs(y_pred - y_test)
+                correct_within_tolerance = np.mean(absolute_errors <= tolerance_threshold)
+
                 # 初始化最高準確率及其對應的模型名稱
                 max_knn_accuracy = -1
                 max_gs_accuracy = -1
@@ -362,7 +368,7 @@ class MyWindow(tk.Tk):
                     knn = KNeighborsRegressor(n_neighbors=5)
                     knn.fit(X_train_scaled, y_train)
                     knn_score = knn.score(X_test_scaled, y_test)
-                    if knn_score > max_knn_accuracy:
+                    if (knn_score > max_knn_accuracy):
                         max_knn_accuracy = knn_score
 
                     # 設定KNN回歸模型和GridSearchCV的參數網格
@@ -375,30 +381,35 @@ class MyWindow(tk.Tk):
                     grid_search = GridSearchCV(knn_gs, param_grid, cv=5, scoring='neg_mean_squared_error')
                     grid_search.fit(X_train_scaled, y_train)
                     gs_score = grid_search.best_estimator_.score(X_test_scaled, y_test)
-                    if gs_score > max_gs_accuracy:
+                    if (gs_score > max_gs_accuracy):
                         max_gs_accuracy = gs_score
 
                     # 初始化決策樹回歸模型
                     dec_tree = DecisionTreeRegressor(random_state=42)
                     dec_tree.fit(X_train, y_train)
                     dec_score = dec_tree.score(X_test, y_test)
-                    if dec_score > max_dec_accuracy:
+                    if (dec_score > max_dec_accuracy):
                         max_dec_accuracy = dec_score
 
                 # 儲存最高準確率到 analysis 模組
                 analysis.max_knn_accuracy = max_knn_accuracy
                 analysis.max_gs_accuracy = max_gs_accuracy
                 analysis.max_dec_accuracy = max_dec_accuracy
+                analysis.correct_within_tolerance = correct_within_tolerance  # 儲存容忍範圍內的正確比率
 
                 # 輸出模型評估結果
-                eval_text = (f"Mean Squared Error(MSE): {mse}\n\n"
-                            f"R-squared(R^2): {r2}\n\n\n"
-                            f"K近鄰模組_準確率：{max_knn_accuracy}\n\n"
-                            f"GridSearchCV網格搜索模組_準確率：{max_gs_accuracy}\n\n"
-                            f"決策樹分析_準確率：{max_dec_accuracy}")
+                eval_text = (
+                    f"Mean Squared Error(MSE): {mse}\n\n"
+                    f"R-squared(R^2): {r2}\n\n\n"
+                    f"K近鄰模組_準確率：{max_knn_accuracy}\n\n"
+                    f"GridSearchCV網格搜索模組_準確率：{max_gs_accuracy}\n\n"
+                    f"決策樹分析_準確率：{max_dec_accuracy}\n\n"
+                    f"在容忍度 {tolerance_percentage * 100}% 範圍內的正確比率: {correct_within_tolerance:.2f}%"
+                )
                 eval_label.config(text=eval_text)
             else:
                 eval_label.config(text="沒有選擇特徵進行回歸分析")
+
 
         # 添加查看選項按鈕
         view_button = tk.Button(inner_frame, text="查看選項", command=view_options, font=('Arial', 10))
@@ -440,11 +451,14 @@ class MyWindow(tk.Tk):
         knn_accuracy = getattr(analysis, 'max_knn_accuracy', '未計算')
         gs_accuracy = getattr(analysis, 'max_gs_accuracy', '未計算')
         dec_accuracy = getattr(analysis, 'max_dec_accuracy', '未計算')
+        tolerance_percentage = 0.01 * 100  # 1% 容忍度
+        correct_within_tolerance = getattr(analysis, 'correct_within_tolerance', '未計算')
 
         # 構建消息框顯示內容
         message = f"K近鄰模組_準確率：{knn_accuracy}\n\n"
         message += f"GridSearchCV網格搜索模組_準確率：{gs_accuracy}\n\n"
-        message += f"決策樹分析_準確率：{dec_accuracy}"
+        message += f"決策樹分析_準確率：{dec_accuracy}\n\n"
+        message += f"在容忍度 {tolerance_percentage}% 範圍內的正確比率: {correct_within_tolerance:.2f}%"
 
         # 使用消息框顯示準確率
         messagebox.showinfo("模型準確率", message)

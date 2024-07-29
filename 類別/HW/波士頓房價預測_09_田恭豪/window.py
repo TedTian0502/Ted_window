@@ -33,6 +33,9 @@ class MyWindow(tk.Tk):
         self.option_add('*font', ('Tahoma', 15, 'bold'))
         self.title("波士頓房價預測")
         self.geometry("800x620")
+
+        # 點擊按鈕紀錄初始化為無
+        self.data_viewed = False
         
         # 呼叫函數以居中視窗
         self.center_window(800, 620)
@@ -111,9 +114,8 @@ class MyWindow(tk.Tk):
         if selected_option == "資料前處理":
             self.show_data_one_window()
         elif selected_option == "特徵變數":
+            self.data_viewed = True
             self.show_data_window()
-        # elif selected_option == "數據三": #如果有第三個選項
-        #     self.show_additional_data_window()
 
     def create_treeview1(self):
         self.destroy_treeview1()
@@ -271,7 +273,7 @@ class MyWindow(tk.Tk):
 
         # 創建用於顯示回歸評估結果的標籤
         eval_label = tk.Label(eval_frame, text="", bg='#508C9B', fg='white', font=('Arial', 12), justify='left')
-        eval_label.pack(padx=20, pady=(60,140), anchor='nw')
+        eval_label.pack(padx=20, pady=(30,120), anchor='nw')
 
         # 定義查看選項的函數
         def view_options():
@@ -304,7 +306,7 @@ class MyWindow(tk.Tk):
             canvas.draw()
             canvas.get_tk_widget().pack(side='top', fill='both', expand=True, padx=5, pady=(0, 5))
 
-            # 根據輸入的閾值x計算選擇特徵
+            # 根據輸入的閾值計算選擇特徵
             try:
                 x_text = threshold_entry.get()
                 if x_text == "請輸入數值" or not x_text:
@@ -339,15 +341,18 @@ class MyWindow(tk.Tk):
                 estimator.fit(x_train, y_train)
                 y_pred = estimator.predict(x_test)
 
-                # 評估回歸模型
+                # 計算在容忍範圍內的正確比率
+                def calculate_correct_within_tolerance(tolerance_percentage):
+                    tolerance_threshold = tolerance_percentage * np.abs(y_test)
+                    absolute_errors = np.abs(y_pred - y_test)
+                    return np.mean(absolute_errors <= tolerance_threshold)
+
+                tolerance_percentages = [0.1, 0.15, 0.2]
+                correct_rates = [calculate_correct_within_tolerance(tp) for tp in tolerance_percentages]
+
+                # 計算回歸模型的其他評估指標
                 mse = mean_squared_error(y_test, y_pred)
                 r2 = r2_score(y_test, y_pred)
-
-                # 計算在容忍範圍內的正確比率
-                tolerance_percentage = 0.01  # 1%
-                tolerance_threshold = tolerance_percentage * np.abs(y_test)
-                absolute_errors = np.abs(y_pred - y_test)
-                correct_within_tolerance = np.mean(absolute_errors <= tolerance_threshold)
 
                 # 初始化最高準確率及其對應的模型名稱
                 max_knn_accuracy = -1
@@ -368,7 +373,7 @@ class MyWindow(tk.Tk):
                     knn = KNeighborsRegressor(n_neighbors=5)
                     knn.fit(X_train_scaled, y_train)
                     knn_score = knn.score(X_test_scaled, y_test)
-                    if (knn_score > max_knn_accuracy):
+                    if knn_score > max_knn_accuracy:
                         max_knn_accuracy = knn_score
 
                     # 設定KNN回歸模型和GridSearchCV的參數網格
@@ -381,34 +386,56 @@ class MyWindow(tk.Tk):
                     grid_search = GridSearchCV(knn_gs, param_grid, cv=5, scoring='neg_mean_squared_error')
                     grid_search.fit(X_train_scaled, y_train)
                     gs_score = grid_search.best_estimator_.score(X_test_scaled, y_test)
-                    if (gs_score > max_gs_accuracy):
+                    if gs_score > max_gs_accuracy:
                         max_gs_accuracy = gs_score
 
                     # 初始化決策樹回歸模型
                     dec_tree = DecisionTreeRegressor(random_state=42)
                     dec_tree.fit(X_train, y_train)
                     dec_score = dec_tree.score(X_test, y_test)
-                    if (dec_score > max_dec_accuracy):
+                    if dec_score > max_dec_accuracy:
                         max_dec_accuracy = dec_score
 
                 # 儲存最高準確率到 analysis 模組
                 analysis.max_knn_accuracy = max_knn_accuracy
                 analysis.max_gs_accuracy = max_gs_accuracy
                 analysis.max_dec_accuracy = max_dec_accuracy
-                analysis.correct_within_tolerance = correct_within_tolerance  # 儲存容忍範圍內的正確比率
+                analysis.correct_within_tolerance = correct_rates  # 儲存容忍範圍內的正確比率
 
                 # 輸出模型評估結果
                 eval_text = (
-                    f"Mean Squared Error(MSE): {mse}\n\n"
-                    f"R-squared(R^2): {r2}\n\n\n"
-                    f"K近鄰模組_準確率：{max_knn_accuracy}\n\n"
-                    f"GridSearchCV網格搜索模組_準確率：{max_gs_accuracy}\n\n"
-                    f"決策樹分析_準確率：{max_dec_accuracy}\n\n"
-                    f"在容忍度 {tolerance_percentage * 100}% 範圍內的正確比率: {correct_within_tolerance:.2f}%"
+                    f"Mean Squared Error (MSE): {mse:.4f}\n\n"
+                    f"R-squared (R^2): {r2:.4f}\n\n"
+                    f"K-近鄰模型準確率: {max_knn_accuracy:.4f}\n\n"
+                    f"GridSearchCV網格搜索模型準確率: {max_gs_accuracy:.4f}\n\n"
+                    f"決策樹回歸模型準確率: {max_dec_accuracy:.4f}\n\n"
+                    f"在容忍度範圍內的正確比率:\n"
+                    f"10%: {correct_rates[0] * 100:.2f}%\n"
+                    f"15%: {correct_rates[1] * 100:.2f}%\n"
+                    f"20%: {correct_rates[2] * 100:.2f}%"
                 )
                 eval_label.config(text=eval_text)
+                
+                # 創建表格顯示容忍度範圍內的正確率
+                table_frame = tk.Frame(right_frame, bg='#7D8ABC')
+                table_frame.pack(padx=20, pady=10, anchor='nw')
+
+                # 標題行
+                tk.Label(table_frame, text="容忍度範圍", bg='#7D8ABC', fg='white', font=('Arial', 12, 'bold')).grid(row=0, column=0, padx=10, pady=5)
+                tk.Label(table_frame, text="10%", bg='#7D8ABC', fg='white', font=('Arial', 12, 'bold')).grid(row=0, column=1, padx=10, pady=5)
+                tk.Label(table_frame, text="15%", bg='#7D8ABC', fg='white', font=('Arial', 12, 'bold')).grid(row=0, column=2, padx=10, pady=5)
+                tk.Label(table_frame, text="20%", bg='#7D8ABC', fg='white', font=('Arial', 12, 'bold')).grid(row=0, column=3, padx=10, pady=5)
+
+                # 正確率數據行
+                tk.Label(table_frame, text="正確率", bg='#7D8ABC', fg='white', font=('Arial', 12)).grid(row=1, column=0, padx=10, pady=5)
+                tk.Label(table_frame, text=f"{correct_rates[0] * 100:.2f}%", bg='#7D8ABC', fg='white', font=('Arial', 12)).grid(row=1, column=1, padx=10, pady=5)
+                tk.Label(table_frame, text=f"{correct_rates[1] * 100:.2f}%", bg='#7D8ABC', fg='white', font=('Arial', 12)).grid(row=1, column=2, padx=10, pady=5)
+                tk.Label(table_frame, text=f"{correct_rates[2] * 100:.2f}%", bg='#7D8ABC', fg='white', font=('Arial', 12)).grid(row=1, column=3, padx=10, pady=5)
+
             else:
-                eval_label.config(text="沒有選擇特徵進行回歸分析")
+                result_label.config(text="未選擇任何特徵。")
+                eval_label.config(text="模型評估結果")
+
 
 
         # 添加查看選項按鈕
@@ -429,42 +456,60 @@ class MyWindow(tk.Tk):
 
         view_options()
 
-    # def show_additional_data_window(self):
-    #     new_window = tk.Toplevel(self)
-    #     new_window.title("數據三")
-    #     new_window.geometry("850x420")
-
-    #     try:
-    #         # 圖表描述標籤
-    #         chart_label = tk.Label(new_window, text="圖表三", font=('Tahoma', 15, 'bold'))
-    #         chart_label.pack(side=tk.TOP, pady=5)
-
-    #     except FileNotFoundError as e:
-    #         messagebox.showerror("錯誤", f"找不到指定的圖片檔案：{e}")
-
     def on_close(self):
         if messagebox.askokcancel("退出", "確定要退出嗎？"):
             self.destroy()
 
     def show_rating_dialog(self):
+        selected_option = self.combobox.get()
+        if selected_option == "請選擇圖表:": 
+            messagebox.showwarning("警告", "請先選擇'特徵變數'")
+            return
+
+        if not self.data_viewed:
+            messagebox.showwarning("警告", "請先查看'特徵變數'")
+            return
+
         # 準備要顯示的準確率數據
         knn_accuracy = getattr(analysis, 'max_knn_accuracy', '未計算')
         gs_accuracy = getattr(analysis, 'max_gs_accuracy', '未計算')
         dec_accuracy = getattr(analysis, 'max_dec_accuracy', '未計算')
-        tolerance_percentage = 0.01 * 100  # 1% 容忍度
-        correct_within_tolerance = getattr(analysis, 'correct_within_tolerance', '未計算')
+
+        # 取得容忍度範圍內的正確比率數據
+        correct_within_tolerance = getattr(analysis, 'correct_within_tolerance', [0, 0, 0])
+
+        # 確保容忍度正確比率是數字並格式化
+        if isinstance(correct_within_tolerance, (float, np.float64)):
+            correct_within_tolerance = [correct_within_tolerance]
+        elif isinstance(correct_within_tolerance, np.ndarray):
+            correct_within_tolerance = correct_within_tolerance.tolist()
+        
+        # 如果有多個容忍度範圍，確保數據足夠
+        tolerance_ranges = [0.1, 0.15, 0.2]  # 10%, 15%, 20%
+        tolerance_correct_rates = correct_within_tolerance[:len(tolerance_ranges)]
+        
+        # 找出正確比率最高的容忍度範圍
+        if tolerance_correct_rates:
+            max_correct_rate_index = np.argmax(tolerance_correct_rates)
+            best_tolerance = tolerance_ranges[max_correct_rate_index]
+            best_correct_rate = tolerance_correct_rates[max_correct_rate_index]
+        else:
+            best_tolerance = '未計算'
+            best_correct_rate = '未計算'
 
         # 構建消息框顯示內容
-        message = f"K近鄰模組_準確率：{knn_accuracy}\n\n"
-        message += f"GridSearchCV網格搜索模組_準確率：{gs_accuracy}\n\n"
-        message += f"決策樹分析_準確率：{dec_accuracy}\n\n"
-        message += f"在容忍度 {tolerance_percentage}% 範圍內的正確比率: {correct_within_tolerance:.2f}%"
+        message = (
+            f"K近鄰模組準確率：{knn_accuracy if knn_accuracy != '未計算' else '未計算'}\n\n"
+            f"GridSearchCV網格搜索模組準確率：{gs_accuracy if gs_accuracy != '未計算' else '未計算'}\n\n"
+            f"決策樹分析準確率：{dec_accuracy if dec_accuracy != '未計算' else '未計算'}\n\n"
+            f"在容忍度 {best_tolerance * 100:.0f}% 範圍內的最高正確比率: {best_correct_rate * 100:.2f}%"
+        )
 
         # 使用消息框顯示準確率
         messagebox.showinfo("模型準確率", message)
 
 
-        
+
 
 if __name__ == "__main__":
     window = MyWindow()

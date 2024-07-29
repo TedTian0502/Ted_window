@@ -21,8 +21,10 @@ try:
     print("成功載入資料")
 except FileNotFoundError:
     print(f"找不到檔案: {dataset_path}")
+    raise
 except Exception as e:
     print(f"發生錯誤: {e}")
+    raise
 
 # 計算特徵相關性
 featuresCorr = data.corr()
@@ -48,6 +50,7 @@ else:
     max_knn_accuracy = -1
     max_gs_accuracy = -1
     max_dec_accuracy = -1
+    best_knn_model = None  # 儲存最佳KNN模型
 
     # 迭代運行五次並找出最高準確率的一次
     for i in range(5):
@@ -65,6 +68,7 @@ else:
         knn_score = knn.score(X_test_scaled, y_test)
         if knn_score > max_knn_accuracy:
             max_knn_accuracy = knn_score
+            best_knn_model = knn  # 更新最佳模型
 
         # 設定KNN回歸模型和GridSearchCV的參數網格
         param_grid = {
@@ -86,20 +90,19 @@ else:
         if dec_score > max_dec_accuracy:
             max_dec_accuracy = dec_score
 
-    # 計算在容忍範圍內的正確比率
-    tolerance_percentage = 0.01  # 1%
-    tolerance_threshold = tolerance_percentage * np.abs(y_test)
-    absolute_errors = np.abs(knn.predict(X_test_scaled) - y_test)
-    correct_within_tolerance = np.mean(absolute_errors <= tolerance_threshold)
+        # 確保最佳模型存在
+        if best_knn_model is not None:
+            # 計算在容忍範圍內的正確比率
+            tolerance_percentage = 0.1  # 1%
+            tolerance_threshold = tolerance_percentage * np.abs(y_test)
+            absolute_errors = np.abs(best_knn_model.predict(X_test_scaled) - y_test)
+            correct_within_tolerance = np.mean(absolute_errors <= tolerance_threshold)
+        else:
+            correct_within_tolerance = None
 
-    # 儲存最高準確率和容忍範圍內的正確比率到 analysis 模組
-    analysis.max_knn_accuracy = max_knn_accuracy
-    analysis.max_gs_accuracy = max_gs_accuracy
-    analysis.max_dec_accuracy = max_dec_accuracy
-    analysis.correct_within_tolerance = correct_within_tolerance
-
-    # 輸出最高準確率和容忍範圍內的正確比率
+    # 輸出結果
     print(f"K近鄰模組_準確率：{max_knn_accuracy}")
     print(f"GridSearchCV網格搜索模組_準確率：{max_gs_accuracy}")
     print(f"決策樹分析_準確率：{max_dec_accuracy}")
-    print(f"在容忍度 {tolerance_percentage * 100}% 範圍內的正確比率: {correct_within_tolerance:.2f}%")
+    # print(f"在容忍度 {tolerance_percentage * 100}% 範圍內的正確比率: {correct_within_tolerance * 100:.2f}%")
+

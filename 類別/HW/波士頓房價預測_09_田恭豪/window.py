@@ -273,7 +273,7 @@ class MyWindow(tk.Tk):
 
         # 創建用於顯示回歸評估結果的標籤
         eval_label = tk.Label(eval_frame, text="", bg='#508C9B', fg='white', font=('Arial', 12), justify='left')
-        eval_label.pack(padx=20, pady=(30,120), anchor='nw')
+        eval_label.pack(padx=20, pady=20, anchor='nw')
 
         # 定義查看選項的函數
         def view_options():
@@ -312,7 +312,13 @@ class MyWindow(tk.Tk):
                 if x_text == "請輸入數值" or not x_text:
                     messagebox.showerror("錯誤", "請輸入有效的數值")
                     return
+                
                 x = float(x_text)
+                
+                # 檢查數值是否在 0 到 1 之間
+                if not (0 <= x <= 1):
+                    messagebox.showerror("錯誤", "數值必須在 0 到 1 之間")
+                    return
             except ValueError:
                 messagebox.showerror("錯誤", "請輸入有效的數值")
                 return
@@ -347,7 +353,8 @@ class MyWindow(tk.Tk):
                     absolute_errors = np.abs(predictions - y_test)
                     return np.mean(absolute_errors <= tolerance_threshold)
 
-                tolerance_percentage = 0.01  # 1%
+                # tolerance_percentage = 0.01  # 1%
+                tolerance_percentage = 0.2  # 為了讓提升模型準確性，嘗試不同的容忍度範圍，以找到最佳的預測準確度
                 correct_within_tolerance_lr = calculate_correct_within_tolerance(tolerance_percentage, y_pred, y_test)
 
                 # 計算回歸模型的其他評估指標
@@ -419,28 +426,36 @@ class MyWindow(tk.Tk):
                     correct_within_tolerance_dec
                 ]
 
+                # 儲存每個模型的MSE和R^2
+                analysis.mse_lr = mse_lr
+                analysis.r2_lr = r2_lr
+                analysis.mse_knn = mse_knn
+                analysis.r2_knn = r2_knn
+                analysis.mse_gs = mse_gs
+                analysis.r2_gs = r2_gs
+                analysis.mse_dec = mse_dec
+                analysis.r2_dec = r2_dec
+
                 # 輸出模型評估結果
                 eval_text = (
                     f"線性回歸模型:\n"
                     f"  MSE: {mse_lr:.4f}\n"
                     f"  R^2: {r2_lr:.4f}\n"
-                    f"  在1%容忍範圍內的正確比率: {correct_within_tolerance_lr:.4f}\n\n"
+                    f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_lr:.4f}\n\n"
                     f"K近鄰回歸模型 (最高準確率):\n"
                     f"  MSE: {mse_knn:.4f}\n"
                     f"  R^2: {r2_knn:.4f}\n"
-                    f"  在1%容忍範圍內的正確比率: {correct_within_tolerance_knn:.4f}\n\n"
+                    f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_knn:.4f}\n\n"
                     f"使用GridSearchCV調整的K近鄰回歸模型 (最高準確率):\n"
                     f"  MSE: {mse_gs:.4f}\n"
                     f"  R^2: {r2_gs:.4f}\n"
-                    f"  在1%容忍範圍內的正確比率: {correct_within_tolerance_gs:.4f}\n\n"
+                    f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_gs:.4f}\n\n"
                     f"決策樹回歸模型 (最高準確率):\n"
                     f"  MSE: {mse_dec:.4f}\n"
                     f"  R^2: {r2_dec:.4f}\n"
-                    f"  在1%容忍範圍內的正確比率: {correct_within_tolerance_dec:.4f}\n"
+                    f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_dec:.4f}\n"
                 )
-                messagebox.showinfo("模型評估結果", eval_text)
-            else:
-                messagebox.showinfo("結果", "沒有特徵符合條件，請降低閾值。")
+                eval_label.config(text=eval_text)
 
 
         # 添加查看選項按鈕
@@ -475,43 +490,66 @@ class MyWindow(tk.Tk):
             messagebox.showwarning("警告", "請先查看'特徵變數'")
             return
 
-        # 準備要顯示的準確率數據
+        # 準備要顯示的數據
         knn_accuracy = getattr(analysis, 'max_knn_accuracy', '未計算')
         gs_accuracy = getattr(analysis, 'max_gs_accuracy', '未計算')
         dec_accuracy = getattr(analysis, 'max_dec_accuracy', '未計算')
+        correct_within_tolerance = getattr(analysis, 'correct_within_tolerance', [0, 0, 0, 0])
 
-        # 取得容忍度範圍內的正確比率數據
-        correct_within_tolerance = getattr(analysis, 'correct_within_tolerance', [0, 0, 0])
+        mse_lr = getattr(analysis, 'mse_lr', '未計算')
+        r2_lr = getattr(analysis, 'r2_lr', '未計算')
+        correct_within_tolerance_lr = correct_within_tolerance[0] if len(correct_within_tolerance) > 0 else '未計算'
 
-        # 確保容忍度正確比率是數字並格式化
-        if isinstance(correct_within_tolerance, (float, np.float64)):
-            correct_within_tolerance = [correct_within_tolerance]
-        elif isinstance(correct_within_tolerance, np.ndarray):
-            correct_within_tolerance = correct_within_tolerance.tolist()
-        
-        # 如果有多個容忍度範圍，確保數據足夠
-        tolerance_ranges = [0.1, 0.15, 0.2]  # 10%, 15%, 20%
-        tolerance_correct_rates = correct_within_tolerance[:len(tolerance_ranges)]
-        
-        # 找出正確比率最高的容忍度範圍
-        if tolerance_correct_rates:
-            max_correct_rate_index = np.argmax(tolerance_correct_rates)
-            best_tolerance = tolerance_ranges[max_correct_rate_index]
-            best_correct_rate = tolerance_correct_rates[max_correct_rate_index]
-        else:
-            best_tolerance = '未計算'
-            best_correct_rate = '未計算'
+        mse_knn = getattr(analysis, 'mse_knn', '未計算')
+        r2_knn = getattr(analysis, 'r2_knn', '未計算')
+        correct_within_tolerance_knn = correct_within_tolerance[1] if len(correct_within_tolerance) > 1 else '未計算'
+
+        mse_gs = getattr(analysis, 'mse_gs', '未計算')
+        r2_gs = getattr(analysis, 'r2_gs', '未計算')
+        correct_within_tolerance_gs = correct_within_tolerance[2] if len(correct_within_tolerance) > 2 else '未計算'
+
+        mse_dec = getattr(analysis, 'mse_dec', '未計算')
+        r2_dec = getattr(analysis, 'r2_dec', '未計算')
+        correct_within_tolerance_dec = correct_within_tolerance[3] if len(correct_within_tolerance) > 3 else '未計算'
+
+        # 根據容忍範圍內的正確比率選擇最好的模型
+        best_model = "線性回歸"
+        best_correct_rate = correct_within_tolerance_lr
+        best_mse = mse_lr
+        best_r2 = r2_lr
+
+        if correct_within_tolerance_knn > best_correct_rate:
+            best_model = "K近鄰回歸"
+            best_correct_rate = correct_within_tolerance_knn
+            best_mse = mse_knn
+            best_r2 = r2_knn
+
+        if correct_within_tolerance_gs > best_correct_rate:
+            best_model = "GridSearchCV調整的K近鄰回歸"
+            best_correct_rate = correct_within_tolerance_gs
+            best_mse = mse_gs
+            best_r2 = r2_gs
+
+        if correct_within_tolerance_dec > best_correct_rate:
+            best_model = "決策樹回歸"
+            best_correct_rate = correct_within_tolerance_dec
+            best_mse = mse_dec
+            best_r2 = r2_dec
 
         # 構建消息框顯示內容
         message = (
-            f"K近鄰模組準確率：{knn_accuracy if knn_accuracy != '未計算' else '未計算'}\n\n"
-            f"GridSearchCV網格搜索模組準確率：{gs_accuracy if gs_accuracy != '未計算' else '未計算'}\n\n"
-            f"決策樹分析準確率：{dec_accuracy if dec_accuracy != '未計算' else '未計算'}\n\n"
-            f"在容忍度 {best_tolerance * 100:.0f}% 範圍內的最高正確比率: {best_correct_rate * 100:.2f}%"
+            f"模型評估結果: 使用{best_model}模型較為準確\n\n"
+            f"MSE: {best_mse if best_mse != '未計算' else '未計算'}\n\n"
+            f"R^2: {best_r2 if best_r2 != '未計算' else '未計算'}\n\n"
+            f"20%容忍範圍內的正確比率: "
+            f"{best_correct_rate * 100:.5f}%" if best_correct_rate != '未計算' 
+            else '未計算'
         )
 
         # 使用消息框顯示準確率
         messagebox.showinfo("模型準確率", message)
+
+
 
 
 

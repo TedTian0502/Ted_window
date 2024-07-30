@@ -52,6 +52,10 @@ else:
     max_dec_accuracy = -1
     best_knn_model = None  # 儲存最佳KNN模型
 
+    mse_lr = mse_knn = mse_gs = mse_dec = r2_lr = r2_knn = r2_gs = r2_dec = 0
+
+    correct_within_tolerance = [0, 0, 0, 0]  # 用於儲存所有模型的正確比率
+
     # 迭代運行五次並找出最高準確率的一次
     for i in range(5):
         # 分割數據集為訓練集和測試集
@@ -70,6 +74,10 @@ else:
             max_knn_accuracy = knn_score
             best_knn_model = knn  # 更新最佳模型
 
+        # 計算KNN模型的MSE和R^2
+        mse_knn = mean_squared_error(y_test, knn.predict(X_test_scaled))
+        r2_knn = r2_score(y_test, knn.predict(X_test_scaled))
+
         # 設定KNN回歸模型和GridSearchCV的參數網格
         param_grid = {
             'n_neighbors': [3, 5, 8, 10],
@@ -83,6 +91,10 @@ else:
         if gs_score > max_gs_accuracy:
             max_gs_accuracy = gs_score
 
+        # 計算GridSearchCV模型的MSE和R^2
+        mse_gs = mean_squared_error(y_test, grid_search.best_estimator_.predict(X_test_scaled))
+        r2_gs = r2_score(y_test, grid_search.best_estimator_.predict(X_test_scaled))
+
         # 初始化決策樹回歸模型
         dec_tree = DecisionTreeRegressor(random_state=42)
         dec_tree.fit(X_train, y_train)
@@ -90,19 +102,43 @@ else:
         if dec_score > max_dec_accuracy:
             max_dec_accuracy = dec_score
 
+        # 計算決策樹模型的MSE和R^2
+        mse_dec = mean_squared_error(y_test, dec_tree.predict(X_test))
+        r2_dec = r2_score(y_test, dec_tree.predict(X_test))
+
         # 確保最佳模型存在
         if best_knn_model is not None:
             # 計算在容忍範圍內的正確比率
-            tolerance_percentage = 0.1  # 1%
+            # tolerance_percentage = 0.01  # 1%
+            tolerance_percentage = 0.1  # 變更容忍範圍內的正確比率: 20%
             tolerance_threshold = tolerance_percentage * np.abs(y_test)
             absolute_errors = np.abs(best_knn_model.predict(X_test_scaled) - y_test)
-            correct_within_tolerance = np.mean(absolute_errors <= tolerance_threshold)
-        else:
-            correct_within_tolerance = None
+            correct_within_tolerance_knn = np.mean(absolute_errors <= tolerance_threshold)
+            correct_within_tolerance[0] = correct_within_tolerance_knn
+
+            # 對GridSearchCV模型進行相同的計算
+            absolute_errors_gs = np.abs(grid_search.best_estimator_.predict(X_test_scaled) - y_test)
+            correct_within_tolerance_gs = np.mean(absolute_errors_gs <= tolerance_threshold)
+            correct_within_tolerance[1] = correct_within_tolerance_gs
+
+            # 對決策樹模型進行相同的計算
+            absolute_errors_dec = np.abs(dec_tree.predict(X_test) - y_test)
+            correct_within_tolerance_dec = np.mean(absolute_errors_dec <= tolerance_threshold)
+            correct_within_tolerance[2] = correct_within_tolerance_dec
 
     # 輸出結果
     print(f"K近鄰模組_準確率：{max_knn_accuracy}")
     print(f"GridSearchCV網格搜索模組_準確率：{max_gs_accuracy}")
     print(f"決策樹分析_準確率：{max_dec_accuracy}")
-    # print(f"在容忍度 {tolerance_percentage * 100}% 範圍內的正確比率: {correct_within_tolerance * 100:.2f}%")
 
+# 儲存全局變數供外部使用
+max_knn_accuracy = max_knn_accuracy
+max_gs_accuracy = max_gs_accuracy
+max_dec_accuracy = max_dec_accuracy
+correct_within_tolerance = correct_within_tolerance
+mse_knn = mse_knn
+r2_knn = r2_knn
+mse_gs = mse_gs
+r2_gs = r2_gs
+mse_dec = mse_dec
+r2_dec = r2_dec

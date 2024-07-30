@@ -16,7 +16,7 @@ app2.layout = html.Div([
     html.Hr(),
     dash_table.DataTable(id='sites_table')
 ])
-
+# 如果要連結多個以上dashboard，必須在callback前面加上app名稱
 @app2.callback(
     Output('sites_table','data'),
     Input('areas','value')

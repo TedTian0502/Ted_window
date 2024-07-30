@@ -47,7 +47,7 @@ app1.layout = html.Div([
     )
 
 ])
-
+# 如果要連結多個以上dashboard，必須在callback前面加上app名稱
 @app1.callback(
     Output('indicator-graphic','figure'),
     Input('xaxis-column','value'),

@@ -24,7 +24,13 @@
 安裝虛擬環境:影片_0516下午 ，長度_1:22:39
 
 啟動虛擬環境:
-conda activate venv1
+conda activate venv2
+
+接著打開 vscode，按下 CTRL+SHIFT+P，在 command palette 輸入 Python: Select Interpreter。
+
+最後再一次 CTRL+SHIFT+P，輸入 Python: Create Terminal。
+就可以在剛剛建立的虛擬環境操作了
+
 
 安裝套件:
 pip install -r requirements.txt

@@ -342,17 +342,17 @@ class MyWindow(tk.Tk):
                 y_pred = estimator.predict(x_test)
 
                 # 計算在容忍範圍內的正確比率
-                def calculate_correct_within_tolerance(tolerance_percentage):
+                def calculate_correct_within_tolerance(tolerance_percentage, predictions, y_test):
                     tolerance_threshold = tolerance_percentage * np.abs(y_test)
-                    absolute_errors = np.abs(y_pred - y_test)
+                    absolute_errors = np.abs(predictions - y_test)
                     return np.mean(absolute_errors <= tolerance_threshold)
 
-                tolerance_percentages = [0.1, 0.15, 0.2]
-                correct_rates = [calculate_correct_within_tolerance(tp) for tp in tolerance_percentages]
+                tolerance_percentage = 0.01  # 1%
+                correct_within_tolerance_lr = calculate_correct_within_tolerance(tolerance_percentage, y_pred, y_test)
 
                 # 計算回歸模型的其他評估指標
-                mse = mean_squared_error(y_test, y_pred)
-                r2 = r2_score(y_test, y_pred)
+                mse_lr = mean_squared_error(y_test, y_pred)
+                r2_lr = r2_score(y_test, y_pred)
 
                 # 初始化最高準確率及其對應的模型名稱
                 max_knn_accuracy = -1
@@ -372,9 +372,13 @@ class MyWindow(tk.Tk):
                     # 使用K近鄰演算法
                     knn = KNeighborsRegressor(n_neighbors=5)
                     knn.fit(X_train_scaled, y_train)
+                    knn_pred = knn.predict(X_test_scaled)
                     knn_score = knn.score(X_test_scaled, y_test)
                     if knn_score > max_knn_accuracy:
                         max_knn_accuracy = knn_score
+                        correct_within_tolerance_knn = calculate_correct_within_tolerance(tolerance_percentage, knn_pred, y_test)
+                        mse_knn = mean_squared_error(y_test, knn_pred)
+                        r2_knn = r2_score(y_test, knn_pred)
 
                     # 設定KNN回歸模型和GridSearchCV的參數網格
                     param_grid = {
@@ -385,57 +389,58 @@ class MyWindow(tk.Tk):
                     knn_gs = KNeighborsRegressor()
                     grid_search = GridSearchCV(knn_gs, param_grid, cv=5, scoring='neg_mean_squared_error')
                     grid_search.fit(X_train_scaled, y_train)
+                    gs_pred = grid_search.best_estimator_.predict(X_test_scaled)
                     gs_score = grid_search.best_estimator_.score(X_test_scaled, y_test)
                     if gs_score > max_gs_accuracy:
                         max_gs_accuracy = gs_score
+                        correct_within_tolerance_gs = calculate_correct_within_tolerance(tolerance_percentage, gs_pred, y_test)
+                        mse_gs = mean_squared_error(y_test, gs_pred)
+                        r2_gs = r2_score(y_test, gs_pred)
 
                     # 初始化決策樹回歸模型
                     dec_tree = DecisionTreeRegressor(random_state=42)
                     dec_tree.fit(X_train, y_train)
+                    dec_pred = dec_tree.predict(X_test)
                     dec_score = dec_tree.score(X_test, y_test)
                     if dec_score > max_dec_accuracy:
                         max_dec_accuracy = dec_score
+                        correct_within_tolerance_dec = calculate_correct_within_tolerance(tolerance_percentage, dec_pred, y_test)
+                        mse_dec = mean_squared_error(y_test, dec_pred)
+                        r2_dec = r2_score(y_test, dec_pred)
 
                 # 儲存最高準確率到 analysis 模組
                 analysis.max_knn_accuracy = max_knn_accuracy
                 analysis.max_gs_accuracy = max_gs_accuracy
                 analysis.max_dec_accuracy = max_dec_accuracy
-                analysis.correct_within_tolerance = correct_rates  # 儲存容忍範圍內的正確比率
+                analysis.correct_within_tolerance = [
+                    correct_within_tolerance_lr, 
+                    correct_within_tolerance_knn, 
+                    correct_within_tolerance_gs, 
+                    correct_within_tolerance_dec
+                ]
 
                 # 輸出模型評估結果
                 eval_text = (
-                    f"Mean Squared Error (MSE): {mse:.4f}\n\n"
-                    f"R-squared (R^2): {r2:.4f}\n\n"
-                    f"K-近鄰模型準確率: {max_knn_accuracy:.4f}\n\n"
-                    f"GridSearchCV網格搜索模型準確率: {max_gs_accuracy:.4f}\n\n"
-                    f"決策樹回歸模型準確率: {max_dec_accuracy:.4f}\n\n"
-                    f"在容忍度範圍內的正確比率:\n"
-                    f"10%: {correct_rates[0] * 100:.2f}%\n"
-                    f"15%: {correct_rates[1] * 100:.2f}%\n"
-                    f"20%: {correct_rates[2] * 100:.2f}%"
+                    f"線性回歸模型:\n"
+                    f"  MSE: {mse_lr:.4f}\n"
+                    f"  R^2: {r2_lr:.4f}\n"
+                    f"  在1%容忍範圍內的正確比率: {correct_within_tolerance_lr:.4f}\n\n"
+                    f"K近鄰回歸模型 (最高準確率):\n"
+                    f"  MSE: {mse_knn:.4f}\n"
+                    f"  R^2: {r2_knn:.4f}\n"
+                    f"  在1%容忍範圍內的正確比率: {correct_within_tolerance_knn:.4f}\n\n"
+                    f"使用GridSearchCV調整的K近鄰回歸模型 (最高準確率):\n"
+                    f"  MSE: {mse_gs:.4f}\n"
+                    f"  R^2: {r2_gs:.4f}\n"
+                    f"  在1%容忍範圍內的正確比率: {correct_within_tolerance_gs:.4f}\n\n"
+                    f"決策樹回歸模型 (最高準確率):\n"
+                    f"  MSE: {mse_dec:.4f}\n"
+                    f"  R^2: {r2_dec:.4f}\n"
+                    f"  在1%容忍範圍內的正確比率: {correct_within_tolerance_dec:.4f}\n"
                 )
-                eval_label.config(text=eval_text)
-                
-                # 創建表格顯示容忍度範圍內的正確率
-                table_frame = tk.Frame(right_frame, bg='#7D8ABC')
-                table_frame.pack(padx=20, pady=10, anchor='nw')
-
-                # 標題行
-                tk.Label(table_frame, text="容忍度範圍", bg='#7D8ABC', fg='white', font=('Arial', 12, 'bold')).grid(row=0, column=0, padx=10, pady=5)
-                tk.Label(table_frame, text="10%", bg='#7D8ABC', fg='white', font=('Arial', 12, 'bold')).grid(row=0, column=1, padx=10, pady=5)
-                tk.Label(table_frame, text="15%", bg='#7D8ABC', fg='white', font=('Arial', 12, 'bold')).grid(row=0, column=2, padx=10, pady=5)
-                tk.Label(table_frame, text="20%", bg='#7D8ABC', fg='white', font=('Arial', 12, 'bold')).grid(row=0, column=3, padx=10, pady=5)
-
-                # 正確率數據行
-                tk.Label(table_frame, text="正確率", bg='#7D8ABC', fg='white', font=('Arial', 12)).grid(row=1, column=0, padx=10, pady=5)
-                tk.Label(table_frame, text=f"{correct_rates[0] * 100:.2f}%", bg='#7D8ABC', fg='white', font=('Arial', 12)).grid(row=1, column=1, padx=10, pady=5)
-                tk.Label(table_frame, text=f"{correct_rates[1] * 100:.2f}%", bg='#7D8ABC', fg='white', font=('Arial', 12)).grid(row=1, column=2, padx=10, pady=5)
-                tk.Label(table_frame, text=f"{correct_rates[2] * 100:.2f}%", bg='#7D8ABC', fg='white', font=('Arial', 12)).grid(row=1, column=3, padx=10, pady=5)
-
+                messagebox.showinfo("模型評估結果", eval_text)
             else:
-                result_label.config(text="未選擇任何特徵。")
-                eval_label.config(text="模型評估結果")
-
+                messagebox.showinfo("結果", "沒有特徵符合條件，請降低閾值。")
 
 
         # 添加查看選項按鈕

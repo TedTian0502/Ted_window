@@ -99,3 +99,8 @@ tvdi_6p3c
 2-3.開啟pgadmin 資料夾右鍵點選"properties"重新更改資料
 2-4.更改2024_07_02和之後有.env檔的:
 2-4-1.將.env之POSTGRESQL_TOKEN更改成新的External Database URL
+
+### 0730
+連結至render，若需要多次修改requirements，想要一次更新完全，在Build Command設定
+
+"檔案名稱"/$ pip install --upgrade pip && pip install -r requirements

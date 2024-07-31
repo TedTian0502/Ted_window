@@ -191,7 +191,8 @@ def evaluate_model(n_clicks, selected_model, threshold, table_data):
 
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
-
+    
+    #feature不能固定，重新調整
     X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
     # 選擇模型

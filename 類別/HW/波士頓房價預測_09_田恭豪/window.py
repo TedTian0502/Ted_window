@@ -13,6 +13,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
@@ -275,7 +276,6 @@ class MyWindow(tk.Tk):
         eval_label = tk.Label(eval_frame, text="", bg='#508C9B', fg='white', font=('Arial', 12), justify='left')
         eval_label.pack(padx=20, pady=20, anchor='nw')
 
-        # 定義查看選項的函數
         def view_options():
             try:
                 # 嘗試讀取CSV檔案
@@ -353,8 +353,7 @@ class MyWindow(tk.Tk):
                     absolute_errors = np.abs(predictions - y_test)
                     return np.mean(absolute_errors <= tolerance_threshold)
 
-                # tolerance_percentage = 0.01  # 1%
-                tolerance_percentage = 0.2  # 為了讓提升模型準確性，嘗試不同的容忍度範圍，以找到最佳的預測準確度
+                tolerance_percentage = 0.2  # 20%
                 correct_within_tolerance_lr = calculate_correct_within_tolerance(tolerance_percentage, y_pred, y_test)
 
                 # 計算回歸模型的其他評估指標
@@ -365,6 +364,7 @@ class MyWindow(tk.Tk):
                 max_knn_accuracy = -1
                 max_gs_accuracy = -1
                 max_dec_accuracy = -1
+                max_rf_accuracy = -1
 
                 # 迭代運行五次並找出最高準確率的一次
                 for i in range(5):
@@ -383,7 +383,6 @@ class MyWindow(tk.Tk):
                     knn_score = knn.score(X_test_scaled, y_test)
                     if knn_score > max_knn_accuracy:
                         max_knn_accuracy = knn_score
-                        correct_within_tolerance_knn = calculate_correct_within_tolerance(tolerance_percentage, knn_pred, y_test)
                         mse_knn = mean_squared_error(y_test, knn_pred)
                         r2_knn = r2_score(y_test, knn_pred)
 
@@ -400,7 +399,6 @@ class MyWindow(tk.Tk):
                     gs_score = grid_search.best_estimator_.score(X_test_scaled, y_test)
                     if gs_score > max_gs_accuracy:
                         max_gs_accuracy = gs_score
-                        correct_within_tolerance_gs = calculate_correct_within_tolerance(tolerance_percentage, gs_pred, y_test)
                         mse_gs = mean_squared_error(y_test, gs_pred)
                         r2_gs = r2_score(y_test, gs_pred)
 
@@ -415,15 +413,28 @@ class MyWindow(tk.Tk):
                         mse_dec = mean_squared_error(y_test, dec_pred)
                         r2_dec = r2_score(y_test, dec_pred)
 
+                    # 使用隨機森林回歸模型
+                    rf = RandomForestRegressor(n_estimators=100, random_state=i)
+                    rf.fit(X_train_scaled, y_train)
+                    rf_pred = rf.predict(X_test_scaled)
+                    rf_score = rf.score(X_test_scaled, y_test)
+                    if rf_score > max_rf_accuracy:
+                        max_rf_accuracy = rf_score
+                        correct_within_tolerance_rf = calculate_correct_within_tolerance(tolerance_percentage, rf_pred, y_test)
+                        mse_rf = mean_squared_error(y_test, rf_pred)
+                        r2_rf = r2_score(y_test, rf_pred)
+
                 # 儲存最高準確率到 analysis 模組
                 analysis.max_knn_accuracy = max_knn_accuracy
                 analysis.max_gs_accuracy = max_gs_accuracy
                 analysis.max_dec_accuracy = max_dec_accuracy
+                analysis.max_rf_accuracy = max_rf_accuracy
                 analysis.correct_within_tolerance = [
                     correct_within_tolerance_lr, 
-                    correct_within_tolerance_knn, 
-                    correct_within_tolerance_gs, 
-                    correct_within_tolerance_dec
+                    None,  # 移除KNN的容忍範圍正確率
+                    None,  # 移除GridSearchCV的容忍範圍正確率
+                    correct_within_tolerance_dec,
+                    correct_within_tolerance_rf
                 ]
 
                 # 儲存每個模型的MSE和R^2
@@ -435,6 +446,8 @@ class MyWindow(tk.Tk):
                 analysis.r2_gs = r2_gs
                 analysis.mse_dec = mse_dec
                 analysis.r2_dec = r2_dec
+                analysis.mse_rf = mse_rf
+                analysis.r2_rf = r2_rf
 
                 # 輸出模型評估結果
                 eval_text = (
@@ -442,20 +455,23 @@ class MyWindow(tk.Tk):
                     f"  MSE: {mse_lr:.4f}\n"
                     f"  R^2: {r2_lr:.4f}\n"
                     f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_lr:.4f}\n\n"
-                    f"K近鄰回歸模型 (最高準確率):\n"
+                    f"K近鄰回歸模型:\n"
                     f"  MSE: {mse_knn:.4f}\n"
-                    f"  R^2: {r2_knn:.4f}\n"
-                    f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_knn:.4f}\n\n"
-                    f"使用GridSearchCV調整的K近鄰回歸模型 (最高準確率):\n"
+                    f"  R^2: {r2_knn:.4f}\n\n"
+                    f"使用GridSearchCV調整的K近鄰回歸模型:\n"
                     f"  MSE: {mse_gs:.4f}\n"
-                    f"  R^2: {r2_gs:.4f}\n"
-                    f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_gs:.4f}\n\n"
-                    f"決策樹回歸模型 (最高準確率):\n"
+                    f"  R^2: {r2_gs:.4f}\n\n"
+                    f"決策樹回歸模型:\n"
                     f"  MSE: {mse_dec:.4f}\n"
                     f"  R^2: {r2_dec:.4f}\n"
-                    f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_dec:.4f}\n"
+                    f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_dec:.4f}\n\n"
+                    f"隨機森林回歸模型:\n"
+                    f"  MSE: {mse_rf:.4f}\n"
+                    f"  R^2: {r2_rf:.4f}\n"
+                    f"  在20%容忍範圍內的正確比率: {correct_within_tolerance_rf:.4f}\n"
                 )
                 eval_label.config(text=eval_text)
+
 
 
         # 添加查看選項按鈕
@@ -472,7 +488,7 @@ class MyWindow(tk.Tk):
 
         # 在右上角框架添加標籤
         label_right = tk.Label(upper_right_frame, bg='#7D8ABC', fg='white', font=('Arial', 16))
-        label_right.pack(pady=50)
+        label_right.pack(pady=30)
 
         view_options()
 
@@ -494,23 +510,20 @@ class MyWindow(tk.Tk):
         knn_accuracy = getattr(analysis, 'max_knn_accuracy', '未計算')
         gs_accuracy = getattr(analysis, 'max_gs_accuracy', '未計算')
         dec_accuracy = getattr(analysis, 'max_dec_accuracy', '未計算')
+        rf_accuracy = getattr(analysis, 'max_rf_accuracy', '未計算')
         correct_within_tolerance = getattr(analysis, 'correct_within_tolerance', [0, 0, 0, 0])
 
         mse_lr = getattr(analysis, 'mse_lr', '未計算')
         r2_lr = getattr(analysis, 'r2_lr', '未計算')
         correct_within_tolerance_lr = correct_within_tolerance[0] if len(correct_within_tolerance) > 0 else '未計算'
 
-        mse_knn = getattr(analysis, 'mse_knn', '未計算')
-        r2_knn = getattr(analysis, 'r2_knn', '未計算')
-        correct_within_tolerance_knn = correct_within_tolerance[1] if len(correct_within_tolerance) > 1 else '未計算'
-
-        mse_gs = getattr(analysis, 'mse_gs', '未計算')
-        r2_gs = getattr(analysis, 'r2_gs', '未計算')
-        correct_within_tolerance_gs = correct_within_tolerance[2] if len(correct_within_tolerance) > 2 else '未計算'
-
         mse_dec = getattr(analysis, 'mse_dec', '未計算')
         r2_dec = getattr(analysis, 'r2_dec', '未計算')
         correct_within_tolerance_dec = correct_within_tolerance[3] if len(correct_within_tolerance) > 3 else '未計算'
+
+        mse_rf = getattr(analysis, 'mse_rf', '未計算')
+        r2_rf = getattr(analysis, 'r2_rf', '未計算')
+        correct_within_tolerance_rf = correct_within_tolerance[4] if len(correct_within_tolerance) > 4 else '未計算'
 
         # 根據容忍範圍內的正確比率選擇最好的模型
         best_model = "線性回歸"
@@ -518,23 +531,17 @@ class MyWindow(tk.Tk):
         best_mse = mse_lr
         best_r2 = r2_lr
 
-        if correct_within_tolerance_knn > best_correct_rate:
-            best_model = "K近鄰回歸"
-            best_correct_rate = correct_within_tolerance_knn
-            best_mse = mse_knn
-            best_r2 = r2_knn
-
-        if correct_within_tolerance_gs > best_correct_rate:
-            best_model = "GridSearchCV調整的K近鄰回歸"
-            best_correct_rate = correct_within_tolerance_gs
-            best_mse = mse_gs
-            best_r2 = r2_gs
-
         if correct_within_tolerance_dec > best_correct_rate:
             best_model = "決策樹回歸"
             best_correct_rate = correct_within_tolerance_dec
             best_mse = mse_dec
             best_r2 = r2_dec
+
+        if correct_within_tolerance_rf > best_correct_rate:
+            best_model = "隨機森林回歸"
+            best_correct_rate = correct_within_tolerance_rf
+            best_mse = mse_rf
+            best_r2 = r2_rf
 
         # 構建消息框顯示內容
         message = (
@@ -542,16 +549,12 @@ class MyWindow(tk.Tk):
             f"MSE: {best_mse if best_mse != '未計算' else '未計算'}\n\n"
             f"R^2: {best_r2 if best_r2 != '未計算' else '未計算'}\n\n"
             f"20%容忍範圍內的正確比率: "
-            f"{best_correct_rate * 100:.5f}%" if best_correct_rate != '未計算' 
+            f"{best_correct_rate * 100:.2f}%" if best_correct_rate != '未計算' 
             else '未計算'
         )
 
         # 使用消息框顯示準確率
         messagebox.showinfo("模型準確率", message)
-
-
-
-
 
 
 if __name__ == "__main__":

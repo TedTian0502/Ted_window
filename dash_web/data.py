@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html
+from dash import dcc, html, dash_table
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -113,6 +113,27 @@ app.layout = dbc.Container([
         dbc.Col(html.H1("波士頓房價數據分析"), width=12)
     ]),
     dbc.Row([
+        dbc.Col(html.Button("查看資料分布狀況", id="collapse-button", n_clicks=0), width=12)
+    ]),
+    dbc.Row([
+        dbc.Col(
+            dbc.Collapse(
+                id='collapse',
+                is_open=False,
+                children=[
+                    dash_table.DataTable(
+                        id='data-describe',
+                        columns=[{'name': i, 'id': i} for i in df.describe().columns] + [{'name': '新欄位', 'id': 'new_column'}],
+                        data=[{**row, 'new_column': 0} for row in df.describe().reset_index().to_dict('records')],
+                        style_table={'overflowX': 'auto'},
+                        style_cell={'textAlign': 'left', 'minWidth': '100px', 'width': '150px', 'maxWidth': '200px'}
+                    )
+                ]
+            ),
+            width=12
+        )
+    ]),
+    dbc.Row([
         dbc.Col(html.Div([
             html.Label("選擇特徵"),
             dcc.Dropdown(
@@ -120,7 +141,7 @@ app.layout = dbc.Container([
                 options=[{'label': col, 'value': col} for col in df.columns if col != 'PRICE'],
                 value=df.columns[0]
             ),
-        ]), width=6),
+        ]), width=6, style={'padding': '0 80px 0 160px'}),
         dbc.Col(html.Div([
             html.Label("選擇修正方法"),
             dcc.Dropdown(
@@ -134,7 +155,7 @@ app.layout = dbc.Container([
                 ],
                 value='對數轉換'
             ),
-        ]), width=6)
+        ]), width=4)
     ]),
     dbc.Row([
         dbc.Col(html.Img(id='feature-image'), width=12)
@@ -155,6 +176,17 @@ def update_image(selected_feature, selected_transformation):
     except Exception as e:
         print(f"Error: {e}")
         return "data:image/png;base64,"  # 返回空圖像以顯示錯誤
+
+# Callback to toggle collapse
+@app.callback(
+    Output('collapse', 'is_open'),
+    [Input('collapse-button', 'n_clicks')],
+    [dash.dependencies.State('collapse', 'is_open')]
+)
+def toggle_collapse(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
 
 # Run the app
 if __name__ == "__main__":

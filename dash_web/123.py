@@ -17,53 +17,13 @@ import plotly.io as pio
 # 讀取數據集
 df = pd.read_csv('train_dataset.csv')
 
-# 標準化 NOX 數據
-nox_standardized = (df['NOX'] - df['NOX'].mean()) / df['NOX'].std()
-
-# 創建圖表
-fig = go.Figure()
-fig.add_trace(go.Histogram(
-    x=df['NOX'],
-    name='NOX (原始數據)',
-    nbinsx=20,
-    marker_color='blue',
-    opacity=0.75,
-    histnorm='probability density'
-))
-fig.add_trace(go.Histogram(
-    x=nox_standardized,
-    name='NOX (標準化數據)',
-    nbinsx=20,
-    marker_color='red',
-    opacity=0.75,
-    histnorm='probability density'
-))
-fig.update_layout(
-    title='NOX 分佈圖',
-    xaxis_title='NOX',
-    yaxis_title='頻次',
-    barmode='overlay',
-    template='plotly_white'
-)
-
-# 將圖表轉換為 HTML 格式
-fig_html = pio.to_html(fig, full_html=False)
-
-# 讀取數據集
-df = pd.read_csv('train_dataset.csv')
-
-# 處理離群值（例如使用四分位距法）
-def remove_outliers(df):
-    df = df.copy()
-    for col in df.columns:
-        if df[col].nunique() <= 1:
-            df = df.drop(columns=[col])
-    
+# 移除異常值函數
+def remove_outliers(df, threshold=1.5):
     Q1 = df.quantile(0.25)
     Q3 = df.quantile(0.75)
     IQR = Q3 - Q1
-    df_out = df[~((df < (Q1 - 1.5 * IQR)) | (df > (Q3 + 1.5 * IQR))).any(axis=1)]
-    return df_out
+    condition = ((df >= (Q1 - threshold * IQR)) & (df <= (Q3 + threshold * IQR)))
+    return df[condition.all(axis=1)]
 
 # 計算特徵轉換
 def transform_feature(df, feature):
@@ -91,6 +51,57 @@ def transform_feature(df, feature):
             method = '無需轉換'
 
     return df, method
+
+# 標準化 NOX 數據
+nox_standardized = (df['NOX'] - df['NOX'].mean()) / df['NOX'].std()
+
+# 創建兩個圖表
+fig1 = go.Figure()
+fig1.add_trace(go.Histogram(
+    x=df['NOX'],
+    name='NOX (原始數據)',
+    nbinsx=20,
+    marker_color='blue',
+    opacity=0.75,
+    histnorm='probability density'
+))
+fig1.add_trace(go.Histogram(
+    x=nox_standardized,
+    name='NOX (標準化數據)',
+    nbinsx=20,
+    marker_color='red',
+    opacity=0.75,
+    histnorm='probability density'
+))
+fig1.update_layout(
+    title='NOX 分佈圖',
+    xaxis_title='NOX',
+    yaxis_title='頻次',
+    barmode='overlay',
+    template='plotly_white'
+)
+
+# 創建第二個圖表
+fig2 = go.Figure()
+fig2.add_trace(go.Box(
+    y=df['NOX'],
+    name='NOX (原始數據)',
+    marker_color='blue'
+))
+fig2.add_trace(go.Box(
+    y=nox_standardized,
+    name='NOX (標準化數據)',
+    marker_color='red'
+))
+fig2.update_layout(
+    title='NOX 數據箱型圖',
+    yaxis_title='NOX',
+    template='plotly_white'
+)
+
+# 將圖表轉換為 HTML 格式
+fig1_html = pio.to_html(fig1, full_html=False)
+fig2_html = pio.to_html(fig2, full_html=False)
 
 # 初始化Dash應用
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -166,10 +177,18 @@ app.layout = html.Div([
         {'name': 'R-squared', 'id': 'r2'},
         {'name': '正確比率', 'id': 'correct_ratio'}
     ], data=[]),
-    html.Iframe(
-        srcDoc=fig_html,
-        style={"width": "100%", "height": "600px", "border": "none"}
-    ),
+
+    # 顯示兩個圖表
+    html.Div([
+        html.Iframe(
+            srcDoc=fig1_html,
+            style={"width": "48%", "height": "600px", "border": "none", "display": "inline-block"}
+        ),
+        html.Iframe(
+            srcDoc=fig2_html,
+            style={"width": "48%", "height": "600px", "border": "none", "display": "inline-block"}
+        )
+    ])
 ])
 
 # 回調函數：切換折疊面板的開啟狀態並更新按鈕文本
@@ -216,7 +235,6 @@ def update_histogram(selected_feature):
     
     return fig
 
-
 # 回調函數：評估模型
 @app.callback(
     Output('model-score', 'children'),
@@ -230,61 +248,53 @@ def evaluate_model(n_clicks, selected_model, threshold, table_data):
     if n_clicks is None:
         return no_update, no_update
 
-    # 資料預處理
-    df_no_outliers = remove_outliers(df)
-    df_no_outliers.fillna(df_no_outliers.mean(), inplace=True)
-    X = df_no_outliers.drop('PRICE', axis=1)
-    y = df_no_outliers['PRICE']
-
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    # 特徵變數和目標變數
+    X = df.drop(columns=['PRICE'])
+    y = df['PRICE']
     
-    #feature不能固定，重新調整
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-
-    # 選擇模型
+    # 切分數據集
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # 標準化數據
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    
+    # 定義模型
     if selected_model == 'linear':
         model = LinearRegression()
     elif selected_model == 'knn':
         model = KNeighborsRegressor()
     elif selected_model == 'knn_grid':
-        param_grid = {'n_neighbors': [3, 5, 7, 9]}
-        grid_search = GridSearchCV(KNeighborsRegressor(), param_grid, cv=5)
-        grid_search.fit(X_train, y_train)
-        model = grid_search.best_estimator_
+        param_grid = {'n_neighbors': range(1, 31)}
+        model = GridSearchCV(KNeighborsRegressor(), param_grid, cv=5)
     elif selected_model == 'decision_tree':
-        model = DecisionTreeRegressor()
+        model = DecisionTreeRegressor(random_state=42)
     elif selected_model == 'random_forest':
-        model = RandomForestRegressor()
+        model = RandomForestRegressor(random_state=42)
     else:
         return no_update, no_update
 
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    # 訓練模型
+    model.fit(X_train_scaled, y_train)
     
+    # 預測
+    y_pred = model.predict(X_test_scaled)
+    
+    # 評估模型
     mse = mean_squared_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
-    correct_ratio = np.mean(np.abs(y_test - y_pred) < threshold)
-
-    model_name = '線性回歸' if selected_model == 'linear' else \
-                 'K近鄰回歸' if selected_model == 'knn' else \
-                 'GridSearchCV調整的K近鄰回歸' if selected_model == 'knn_grid' else \
-                 '決策樹回歸' if selected_model == 'decision_tree' else \
-                 '隨機森林'
-
-    new_row = {
-        'model': model_name,
-        'mse': mse,
-        'r2': r2,
-        'correct_ratio': correct_ratio
-    }
-
+    correct_ratio = 0.0
+    
+    # 以0.51閾值篩選特徵
+    selected_features = X_train.columns[(X_train.corrwith(y_train).abs() > threshold)].tolist()
+    
+    # 更新結果表格
+    new_row = {'model': selected_model, 'mse': mse, 'r2': r2, 'correct_ratio': correct_ratio}
     table_data.append(new_row)
+    
+    return f"模型: {selected_model}, MSE: {mse:.4f}, R-squared: {r2:.4f}, 正確比率: {correct_ratio:.4f}", table_data
 
-    return f"均方誤差(MSE): {mse:.2f}, R-squared: {r2:.2f}, 正確比率: {correct_ratio:.2f}", table_data
-
-
-
-
+# 啟動應用
 if __name__ == '__main__':
-    app.run_server("localhost",8070 ,debug=True)
+    app.run_server(debug=True)

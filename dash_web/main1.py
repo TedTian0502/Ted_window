@@ -287,4 +287,4 @@ def evaluate_model(n_clicks, selected_model, threshold, table_data):
 
 
 if __name__ == '__main__':
-    app.run_server("localhost",8070 ,debug=True)
+    app.run_server("localhost",8040 ,debug=True)

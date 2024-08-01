@@ -1,6 +1,16 @@
-# dash_flask_web
-整合dash,flask的web服務
+## dash_flask_web
+### 機器學習流程
+我的機器學習專案流程分成7個步驟，以下為上述圖片內容的步驟說明:  
+1.收集資料，彙整為資料集(Dataset)。來自於原先在Scikit-Learn的Bostion Housing Dataset(現在已經下架)的train_dataset(訓練集)。  
 
+2.資料清理(Data Cleaning)、資料探索與分析(Exploratory Data Analysis, EDA)：EDA通常是以描述統計量及統計圖觀察資料的分佈，瞭解資料的特性、極端值(Outlier)、變數之間的關聯性。  
 
-CRIM:對數轉換
-ZN :不使用
+3.特徵工程(Feature Engineering)：原始蒐集的資料未必是影響預測目標的關鍵因素，有時候需要進行資料轉換，以找到關鍵的影響變數。
+
+4.資料切割(Data Split)：切割為訓練資料(Training Data)及測試資料(TestData)，一份資料提供模型訓練之用，另一份資料則用在衡量模型效能，例如準確度，切割的主要原因是確保測試資料不會參與訓練，以維持其公正性，即Out-of-Sample Test。
+
+5.選擇演算法(Learning Algorithms)：依據問題的類型選擇適合的演算法。
+
+6.模型訓練(Model Training)：以演算法及訓練資料，進行訓練產出模型。
+
+7.模型評分(Score Model)：計算準確度等效能指標，評估模型的準確性。

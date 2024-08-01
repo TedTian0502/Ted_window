@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, dash_table
+from dash import Dash, dcc, html, dash_table
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -10,6 +10,9 @@ import base64
 import matplotlib
 from scipy import stats
 import numpy as np
+
+app1 = Dash(__name__,requests_pathname_prefix='/dashboard/app1/')
+app1.title = '特徵數據'
 
 # 設置 matplotlib 使用的字型，選擇支持中文的字型
 matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']  # 或其他支持中文的字型
@@ -126,7 +129,7 @@ def encode_image(buf):
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Define the layout of the app
-app.layout = dbc.Container([
+app1.layout = dbc.Container([
     dbc.Row([
         dbc.Col(html.H1("特徵常態分佈圖"), width=12),
     ], style={'textAlign': 'center',
@@ -202,7 +205,7 @@ app.layout = dbc.Container([
 
 
 # Callback to update image based on selected feature and transformation
-@app.callback(
+@app1.callback(
     Output('feature-image', 'src'),
     [Input('feature-dropdown', 'value'),
      Input('transformation-dropdown', 'value')]
@@ -217,7 +220,7 @@ def update_image(selected_feature, selected_transformation):
         return "data:image/png;base64,"  # 返回空圖像以顯示錯誤
 
 # Callback to toggle collapse
-@app.callback(
+@app1.callback(
     Output('collapse', 'is_open'),
     [Input('collapse-button', 'n_clicks')],
     [dash.dependencies.State('collapse', 'is_open')]
@@ -228,5 +231,5 @@ def toggle_collapse(n_clicks, is_open):
     return is_open
 
 # Run the app
-if __name__ == "__main__":
-    app.run_server("localhost", 8060, debug=True)
+# if __name__ == "__main__":
+#     app.run_server("localhost", 8060, debug=True)

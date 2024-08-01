@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, dash_table
+from dash import Dash,dcc, html, dash_table
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -16,6 +16,9 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
+
+app2 = Dash(__name__,requests_pathname_prefix='/dashboard/app2/')
+app2.title = '模型評估'
 
 # 設置 matplotlib 使用的字型，選擇支持中文的字型
 matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']
@@ -198,5 +201,5 @@ def manage_results(evaluate_clicks, selected_model, threshold):
     return '請點擊按鈕以查看結果', '查看特徵數與名稱', results_store
 
 # 運行 Dash 應用程序
-if __name__ == '__main__':
-    app.run_server("localhost", 8050,debug=True)
+# if __name__ == '__main__':
+#     app.run_server("localhost", 8050,debug=True)

@@ -25,7 +25,7 @@ matplotlib.rcParams['axes.unicode_minus'] = False
 matplotlib.use('Agg')
 
 # 從 CSV 檔案載入數據集
-df = pd.read_csv('train_dataset.csv')
+df = pd.read_csv('../train_dataset.csv')
 
 # 定義移除離群值的函數
 def remove_outliers(data):

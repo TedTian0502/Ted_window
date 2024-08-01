@@ -19,7 +19,7 @@ matplotlib.rcParams['axes.unicode_minus'] = False  # 顯示負號
 matplotlib.use('Agg')
 
 # Load the dataset from CSV
-df = pd.read_csv('train_dataset.csv')
+df = pd.read_csv('../train_dataset.csv')
 
 # Function to remove outliers
 def remove_outliers(data):

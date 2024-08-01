@@ -49,8 +49,11 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 # 定義應用程序的佈局
 app.layout = dbc.Container([
     dbc.Row([
-        dbc.Col(html.H1("波士頓房價數據分析"), width=12)
-    ], style={'margin-bottom': '20px'}),  # 標題行
+        dbc.Col(html.H1("演算法評估結果比較"), width=12)
+    ], style={'textAlign': 'center',
+              'backgroundColor': '#f8f9fa',
+              'padding': '10px'
+              }),  # 標題行
     dbc.Row(
         children=[
             dbc.Col(dcc.Dropdown(
@@ -75,7 +78,7 @@ app.layout = dbc.Container([
         dbc.Col(html.Pre(id='selected-features', style={'backgroundColor': '#E2E2B6', 'padding': '10px', 'border': '1px solid #dee2e6', 'font-size': '18px'}), width=6)
     ], style={'margin-bottom': '20px'}),  # 顯示評估結果和特徵數及名稱的區域
     dbc.Row([
-        dbc.Col(html.H3("模型評估分數"), width=12)
+        dbc.Col(html.H3("紀錄評估分數"), width=12)
     ], style={'margin-bottom': '20px'}),  # 模型評估分數標題
     dbc.Row([
         dbc.Col(dash_table.DataTable(

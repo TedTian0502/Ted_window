@@ -56,16 +56,16 @@ app.layout = dbc.Container([
             dbc.Col(dcc.Dropdown(
                 id='model-dropdown',
                 options=[
-                    {'label': '線性回歸', 'value': 'linear-regression'},
-                    {'label': 'K近鄰回歸模型', 'value': 'knn'},
-                    {'label': 'GridSearchCV', 'value': 'grid-search'},
-                    {'label': '決策樹', 'value': 'decision-tree'},
-                    {'label': '隨機森林', 'value': 'random-forest'}
+                    {'label': '線性回歸(linear-regression)', 'value': 'linear-regression'},
+                    {'label': 'K近鄰回歸模型(KNN)', 'value': 'knn'},
+                    {'label': 'GridSearchCV(grid-search)', 'value': 'grid-search'},
+                    {'label': '決策樹(decision-tree)', 'value': 'decision-tree'},
+                    {'label': '隨機森林(random-forest)', 'value': 'random-forest'}
                 ],
                 placeholder='請選擇模型',
                 style={'width': '100%'}
             ), width=6, style={'margin-bottom': '10px'}),
-            dbc.Col(dcc.Input(id='threshold-input', type='number', min=0, max=1, step=0.01, disabled=True), width=2, style={'margin-bottom': '10px'}),
+            dbc.Col(dcc.Input(id='threshold-input', type='number', min=0, max=0.99, step=0.01, disabled=True), width=2, style={'margin-bottom': '10px'}),
             dbc.Col(dbc.Button("查看結果", id='evaluate-button', n_clicks=0), width='auto', style={'margin': '0 5px 10px 0'}),
         ],
         style={'display': 'flex', 'align-items': 'center'}
@@ -85,7 +85,7 @@ app.layout = dbc.Container([
                 {'name': '閾值', 'id': 'threshold'},
                 {'name': 'MSE', 'id': 'mse'},
                 {'name': 'R-squared', 'id': 'r_squared'},
-                {'name': '準確率', 'id': 'accuracy'}
+                {'name': '20%容忍範圍內的正確比率:', 'id': 'accuracy'}
             ],
             data=[],  # 初始數據為空
             style_table={'overflowX': 'auto'},
@@ -121,21 +121,35 @@ def enable_threshold_input(selected_model):
 def manage_results(evaluate_clicks, selected_model, threshold):
     global results_store, selected_model_store, last_threshold
 
+    invalid_thresholds = ['00', '000', '01', '0001']
+
     if evaluate_clicks > 0:
-        # 若未選擇模型或未輸入閾值
         if selected_model is None:
             return '請先選擇模型並輸入閾值', '查看特徵數與名稱', results_store
-        if threshold is None:
-            return '請輸入閾值', '查看特徵數與名稱', results_store
+        if threshold is None or str(threshold) in invalid_thresholds:
+            return '請重新輸入閾值', '查看特徵數與名稱', results_store
 
-        # 根據選擇的模型進行評估
+        # 根據閾值選擇特徵
         correlation_matrix = df_clean.corr().loc[:, 'PRICE']
         selected_features = correlation_matrix[correlation_matrix.abs() > threshold].index
-        features = df_clean[selected_features].drop(columns=['PRICE'])
+        
+        if 'PRICE' in selected_features:
+            features = df_clean[selected_features].drop(columns=['PRICE'])
+        else:
+            features = df_clean[selected_features]
 
+        # 檢查是否有數據
+        if features.empty or 'PRICE' not in df_clean.columns:
+            return '選擇的特徵中無有效數據', '查看特徵數與名稱', results_store
+        
         X = features.dropna()
         y = df_clean.loc[X.index, 'PRICE']
+        
+        # 檢查 X 和 y 是否有效
+        if X.empty or y.empty or X.shape[0] != y.shape[0]:
+            return '特徵或目標變量無有效數據', '查看特徵數與名稱', results_store
 
+        # 根據所選擇的模型進行評估
         if selected_model == 'linear-regression':
             model = LinearRegression()
         elif selected_model == 'knn':
@@ -150,11 +164,19 @@ def manage_results(evaluate_clicks, selected_model, threshold):
         else:
             return '未知模型選擇', '查看特徵數與名稱', results_store
 
+        # 訓練模型
         model.fit(X, y)
         predictions = model.predict(X)
         mse = mean_squared_error(y, predictions)
         r_squared = r2_score(y, predictions)
-        accuracy = model.score(X, y)
+        
+        if selected_model in ['knn', 'grid-search']:
+            accuracy = "--"
+        else:
+            accuracy = model.score(X, y)
+
+        if len(results_store) >= 5:
+            results_store = []
 
         results_store.append({
             'model': selected_model,
@@ -165,13 +187,13 @@ def manage_results(evaluate_clicks, selected_model, threshold):
         })
 
         selected_model_store = selected_model
-        last_threshold = threshold  # 更新上一次的閾值
+        last_threshold = threshold
 
-        return (f'評估模型: {selected_model}\nMSE: {mse:.4f}\nR-squared: {r_squared:.4f}\n準確率: {accuracy:.4f}',
+        return (f'評估模型: {selected_model}\nMSE: {mse:.4f}\nR-squared: {r_squared:.4f}\n準確率: {accuracy}',
                 f'特徵數量: {len(features.columns)}\n特徵名稱: {features.columns.tolist()}',
                 results_store)
     return '請點擊按鈕以查看結果', '查看特徵數與名稱', results_store
 
 # 運行 Dash 應用程序
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server("localhost", 8050,debug=True)

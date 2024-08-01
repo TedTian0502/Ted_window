@@ -128,11 +128,21 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 # Define the layout of the app
 app.layout = dbc.Container([
     dbc.Row([
-        dbc.Col(html.H1("波士頓房價數據分析"), width=12)
-    ]),
+        dbc.Col(html.H1("特徵常態分佈圖"), width=12),
+    ], style={'textAlign': 'center',
+              'backgroundColor': '#f8f9fa',
+              'padding': '20px'
+              }),  # 居中顯示標題
+
     dbc.Row([
-        dbc.Col(html.Button("查看資料分布狀況", id="collapse-button", n_clicks=0), width=12)
-    ]),
+        dbc.Col(
+            html.Button("查看資料分布狀況", id="collapse-button", n_clicks=0),
+            width={'size': 6},  # 設置寬度
+            style={'textAlign': 'center',
+                   'padding': '10px'}  # 確保按鈕在其容器內居中
+        )
+    ], style={'display': 'flex', 'justify-content': 'center'}),  # 使用 flexbox 來居中按鈕
+
     dbc.Row([
         dbc.Col(
             dbc.Collapse(
@@ -151,34 +161,45 @@ app.layout = dbc.Container([
             width=12
         )
     ]),
+
     dbc.Row([
-        dbc.Col(html.Div([
-            html.Label("選擇特徵"),
-            dcc.Dropdown(
-                id='feature-dropdown',
-                options=[{'label': col, 'value': col} for col in df.columns if col != 'PRICE'],
-                value=df.columns[0]
-            ),
-        ]), width=5),
-        dbc.Col(html.Div([
-            html.Label("選擇修正方法"),
-            dcc.Dropdown(
-                id='transformation-dropdown',
-                options=[
-                    {'label': '對數轉換 (資料不能有0或負數)', 'value': '對數轉換'},
-                    {'label': '平方根轉換 (資料不能是負數)', 'value': '平方根轉換'},
-                    {'label': '立方根轉換', 'value': '立方根轉換'},
-                    {'label': '次方轉換 (只能處理左偏)', 'value': '次方轉換'},
-                    {'label': 'Box-Cox 轉換', 'value': 'Box-Cox 轉換'}
-                ],
-                value='對數轉換'
-            ),
-        ]), width=5)
-    ]),
+        dbc.Col(
+            html.Div([
+                html.Label("選擇特徵"),
+                dcc.Dropdown(
+                    id='feature-dropdown',
+                    options=[{'label': col, 'value': col} for col in df.columns if col != 'PRICE'],
+                    value=df.columns[0]
+                ),
+            ]),
+            width=4,
+            style={'textAlign': 'center'}  # 將選單在其容器內居中
+        ),
+        dbc.Col(
+            html.Div([
+                html.Label("選擇修正方法"),
+                dcc.Dropdown(
+                    id='transformation-dropdown',
+                    options=[
+                        {'label': '對數轉換 (資料不能有0或負數)', 'value': '對數轉換'},
+                        {'label': '平方根轉換 (資料不能是負數)', 'value': '平方根轉換'},
+                        {'label': '立方根轉換', 'value': '立方根轉換'},
+                        {'label': '次方轉換 (只能處理左偏)', 'value': '次方轉換'},
+                        {'label': 'Box-Cox 轉換', 'value': 'Box-Cox 轉換'}
+                    ],
+                    value='對數轉換'
+                ),
+            ]),
+            width=4,
+            style={'textAlign': 'center'}  # 將選單在其容器內居中
+        )
+    ], style={'display': 'flex', 'justify-content': 'center'}),  # 使用 flexbox 來居中選單和修正方法
+
     dbc.Row([
         dbc.Col(html.Img(id='feature-image'), width=12)
     ])
-])
+], fluid=True)  # 確保容器填滿整個可見區域
+
 
 # Callback to update image based on selected feature and transformation
 @app.callback(

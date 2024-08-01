@@ -159,7 +159,7 @@ app.layout = dbc.Container([
                 options=[{'label': col, 'value': col} for col in df.columns if col != 'PRICE'],
                 value=df.columns[0]
             ),
-        ]), width=6, style={'padding': '0 80px 0 160px'}),
+        ]), width=5),
         dbc.Col(html.Div([
             html.Label("選擇修正方法"),
             dcc.Dropdown(
@@ -173,7 +173,7 @@ app.layout = dbc.Container([
                 ],
                 value='對數轉換'
             ),
-        ]), width=4)
+        ]), width=5)
     ]),
     dbc.Row([
         dbc.Col(html.Img(id='feature-image'), width=12)

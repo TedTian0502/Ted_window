@@ -1,300 +1,186 @@
-from dash import Dash, dcc, html, Input, Output, State, dash_table, no_update
-import dash_bootstrap_components as dbc
+import dash
+from dash import dcc, html, dash_table
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
+import io
+import base64
+import matplotlib
+from scipy import stats
 import numpy as np
-import plotly.graph_objs as go
-from plotly.subplots import make_subplots
-from scipy.stats import skew, boxcox
-from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
-import plotly.io as pio
 
-# 讀取數據集
+# 設置 matplotlib 使用的字型，選擇支持中文的字型
+matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']
+matplotlib.rcParams['axes.unicode_minus'] = False
+
+# 使用 'Agg' 後端
+matplotlib.use('Agg')
+
+# 從 CSV 檔案載入數據集
 df = pd.read_csv('train_dataset.csv')
 
-# 移除異常值函數
-def remove_outliers(df, threshold=1.5):
-    Q1 = df.quantile(0.25)
-    Q3 = df.quantile(0.75)
-    IQR = Q3 - Q1
-    condition = ((df >= (Q1 - threshold * IQR)) & (df <= (Q3 + threshold * IQR)))
-    return df[condition.all(axis=1)]
+# 定義移除離群值的函數
+def remove_outliers(data):
+    return data[(data - data.mean()).abs() < 3 * data.std()]
 
-# 計算特徵轉換
-def transform_feature(df, feature):
-    skewness = skew(df[feature].dropna())
-    if skewness > 1:
-        if (df[feature] > 0).all():
-            df[feature] = np.log1p(df[feature])
-            method = '對數轉換'
-        else:
-            df[feature] = np.cbrt(df[feature])
-            method = '立方根轉換'
-    elif 0.5 < skewness <= 1:
-        if (df[feature] >= 0).all():
-            df[feature] = np.sqrt(df[feature])
-            method = '平方根轉換'
-        else:
-            df[feature] = np.cbrt(df[feature])
-            method = '立方根轉換'
-    else:
-        if df[feature].nunique() > 1:
-            df[feature], _ = boxcox(df[feature] + 1)
-            method = 'Box-Cox 轉換'
-        else:
-            df[feature] = df[feature]
-            method = '無需轉換'
+# 移除所有特徵的離群值
+df_clean = df.apply(remove_outliers)
 
-    return df, method
+# 移除包含 NaN 的行
+df_clean.dropna(inplace=True)
 
-# 標準化 NOX 數據
-nox_standardized = (df['NOX'] - df['NOX'].mean()) / df['NOX'].std()
+# 定義將圖像緩衝區轉換為 base64 的函數
+def encode_image(buf):
+    encoded = base64.b64encode(buf.read()).decode('ascii')
+    buf.close()
+    return encoded
 
-# 創建兩個圖表
-fig1 = go.Figure()
-fig1.add_trace(go.Histogram(
-    x=df['NOX'],
-    name='NOX (原始數據)',
-    nbinsx=20,
-    marker_color='blue',
-    opacity=0.75,
-    histnorm='probability density'
-))
-fig1.add_trace(go.Histogram(
-    x=nox_standardized,
-    name='NOX (標準化數據)',
-    nbinsx=20,
-    marker_color='red',
-    opacity=0.75,
-    histnorm='probability density'
-))
-fig1.update_layout(
-    title='NOX 分佈圖',
-    xaxis_title='NOX',
-    yaxis_title='頻次',
-    barmode='overlay',
-    template='plotly_white'
-)
+# 初始化 Dash 應用程序
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# 創建第二個圖表
-fig2 = go.Figure()
-fig2.add_trace(go.Box(
-    y=df['NOX'],
-    name='NOX (原始數據)',
-    marker_color='blue'
-))
-fig2.add_trace(go.Box(
-    y=nox_standardized,
-    name='NOX (標準化數據)',
-    marker_color='red'
-))
-fig2.update_layout(
-    title='NOX 數據箱型圖',
-    yaxis_title='NOX',
-    template='plotly_white'
-)
-
-# 將圖表轉換為 HTML 格式
-fig1_html = pio.to_html(fig1, full_html=False)
-fig2_html = pio.to_html(fig2, full_html=False)
-
-# 初始化Dash應用
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-# 定義應用佈局
-app.layout = html.Div([
-    html.H1("房價預測互動式Dash應用"),
-    
-    # Open collapse 按鈕
-    html.Button("查看資料分布狀況", id="collapse-button", n_clicks=0),
-    
-    # 可折疊的內容區域
-    dbc.Collapse(
-        id='collapse',
-        is_open=False,
-        children=[
-            dash_table.DataTable(
-                id='data-describe',
-                columns=[{'name': i, 'id': i} for i in df.describe().columns],
-                data=df.describe().reset_index().to_dict('records'),
-                style_table={'overflowX': 'auto'},
-                style_cell={'textAlign': 'left', 'minWidth': '100px', 'width': '150px', 'maxWidth': '200px'}
-            )
-        ]
-    ),
-
-    # 特徵選擇
-    html.Div([
-        html.Label("選擇特徵"),
-        dcc.Dropdown(
-            id='feature-dropdown',
-            options=[{'label': col, 'value': col} for col in df.columns if col != 'PRICE'],
-            value=df.columns[0]
-        ),
-    ]),
-
-    # 特徵分佈圖
-    dcc.Graph(id='feature-histogram'),
-    
-    # 模型選擇
-    html.Div([
-        html.Label("選擇模型"),
-        dcc.Dropdown(
+# 定義應用程序的佈局
+app.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col(html.H1("波士頓房價數據分析"), width=12)
+    ], style={'margin-bottom': '20px'}),  # 標題行
+    dbc.Row([
+        dbc.Col(dcc.Dropdown(
             id='model-dropdown',
             options=[
-                {'label': '線性回歸', 'value': 'linear'},
-                {'label': 'K近鄰回歸', 'value': 'knn'},
-                {'label': 'GridSearchCV調整的K近鄰回歸', 'value': 'knn_grid'},
-                {'label': '決策樹回歸', 'value': 'decision_tree'},
-                {'label': '隨機森林', 'value': 'random_forest'}
+                {'label': '線性回歸', 'value': 'linear-regression'},
+                {'label': 'K近鄰回歸模型', 'value': 'knn'},
+                {'label': 'GridSearchCV', 'value': 'grid-search'},
+                {'label': '決策樹', 'value': 'decision-tree'},
+                {'label': '隨機森林', 'value': 'random-forest'}
             ],
-            value='linear'
-        ),
+            placeholder='請選擇模型',
+            style={'width': '100%'}
+        ), width=6, style={'margin-bottom': '20px'}),  # 模型選擇下拉框
+        dbc.Col(dcc.Input(id='threshold-input', type='number', min=0, max=1, step=0.01, disabled=True), width=2),
+        dbc.Col(dbc.Button("查看結果", id='evaluate-button', n_clicks=0), width=2),
+        dbc.Col(dbc.Button("刪除數據", id='clear-button', n_clicks=0), width=2)  # 新增刪除數據按鈕
     ]),
-
-    # 閾值輸入框
-    html.Div([
-        html.Label("輸入閾值 (0~1)"),
-        dcc.Input(id='threshold-input', type='number', min=0, max=1, step=0.01, value=0.5),
-    ]),
-
-    # 模型分數顯示
-    html.Div([
-        html.Button('評估模型', id='evaluate-button'),
-        html.Div(id='model-score')
-    ]),
-
-    # 結果記錄表格
-    html.H3("模型分數記錄"),
-    dash_table.DataTable(id='results-table', columns=[
-        {'name': '模型', 'id': 'model'},
-        {'name': 'MSE', 'id': 'mse'},
-        {'name': 'R-squared', 'id': 'r2'},
-        {'name': '正確比率', 'id': 'correct_ratio'}
-    ], data=[]),
-
-    # 顯示兩個圖表
-    html.Div([
-        html.Iframe(
-            srcDoc=fig1_html,
-            style={"width": "48%", "height": "600px", "border": "none", "display": "inline-block"}
-        ),
-        html.Iframe(
-            srcDoc=fig2_html,
-            style={"width": "48%", "height": "600px", "border": "none", "display": "inline-block"}
-        )
-    ])
+    dbc.Row([
+        dbc.Col(html.Pre(id='evaluation-result', style={'backgroundColor': '#6EACDA', 'padding': '10px', 'border': '1px solid #dee2e6', 'font-size': '18px'}), width=6),
+        dbc.Col(html.Pre(id='selected-features', style={'backgroundColor': '#E2E2B6', 'padding': '10px', 'border': '1px solid #dee2e6', 'font-size': '18px'}), width=6)
+    ], style={'margin-bottom': '20px'}),  # 顯示評估結果和特徵數及名稱的區域
+    dbc.Row([
+        dbc.Col(html.H3("模型評估分數"), width=12)
+    ], style={'margin-bottom': '20px'}),  # 模型評估分數標題
+    dbc.Row([
+        dbc.Col(dash_table.DataTable(
+            id='evaluation-table',
+            columns=[
+                {'name': '模型名稱', 'id': 'model'},
+                {'name': 'MSE', 'id': 'mse'},
+                {'name': 'R-squared', 'id': 'r_squared'},
+                {'name': '準確率', 'id': 'accuracy'}
+            ],
+            data=[],  # 初始數據為空
+            style_table={'overflowX': 'auto'},
+            style_cell={'textAlign': 'left', 'minWidth': '100px', 'width': '150px', 'maxWidth': '200px'}
+        ), width=12)
+    ])  # 顯示模型評估分數的數據表
 ])
 
-# 回調函數：切換折疊面板的開啟狀態並更新按鈕文本
+# 儲存結果和選擇的模型
+results_store = []
+selected_model_store = None
+
 @app.callback(
-    Output('collapse', 'is_open'),
-    Output('collapse-button', 'children'),
-    Input('collapse-button', 'n_clicks'),
-    State('collapse', 'is_open')
+    [Output('threshold-input', 'disabled'),
+     Output('threshold-input', 'value')],
+    Input('model-dropdown', 'value')
 )
-def toggle_collapse(n_clicks, is_open):
-    if n_clicks:
-        is_open = not is_open
-    button_text = "關閉" if is_open else "查看資料分布狀況"
-    return is_open, button_text
+def enable_threshold_input(selected_model):
+    # 根據所選擇的模型來啟用或禁用閾值輸入框
+    if selected_model is None:
+        return True, None  # 若未選擇模型，禁用閾值輸入框
+    return False, None  # 若選擇了模型，啟用閾值輸入框
 
-# 回調函數：更新特徵分佈圖
 @app.callback(
-    Output('feature-histogram', 'figure'),
-    Input('feature-dropdown', 'value')
+    [Output('evaluation-result', 'children'),
+     Output('selected-features', 'children'),
+     Output('evaluation-table', 'data')],
+    [Input('evaluate-button', 'n_clicks'),
+     Input('clear-button', 'n_clicks')],
+    [State('model-dropdown', 'value'),
+     State('threshold-input', 'value')]
 )
-def update_histogram(selected_feature):
-    df_no_outliers = remove_outliers(df)
-    df_transformed, method = transform_feature(df_no_outliers.copy(), selected_feature)
-    
-    # 使用 plotly.graph_objs 來創建直方圖
-    fig = go.Figure()
-    
-    # 繪製直方圖
-    fig.add_trace(
-        go.Histogram(
-            x=df_transformed[selected_feature].dropna(),
-            name=selected_feature,
-            marker_color='blue'
-        )
-    )
-    
-    # 更新圖表佈局
-    fig.update_layout(
-        title=f'{selected_feature} 的分佈圖 ({method})', 
-        xaxis_title=selected_feature, 
-        yaxis_title='頻次',
-        template='plotly_white'
-    )
-    
-    return fig
+def manage_results(evaluate_clicks, clear_clicks, selected_model, threshold):
+    global results_store, selected_model_store
 
-# 回調函數：評估模型
-@app.callback(
-    Output('model-score', 'children'),
-    Output('results-table', 'data'),
-    Input('evaluate-button', 'n_clicks'),
-    State('model-dropdown', 'value'),
-    State('threshold-input', 'value'),
-    State('results-table', 'data')
-)
-def evaluate_model(n_clicks, selected_model, threshold, table_data):
-    if n_clicks is None:
-        return no_update, no_update
+    # 當「刪除數據」按鈕被點擊時，清空結果數據
+    if clear_clicks > 0:
+        results_store = []
+        return '請選擇模型並輸入閾值', '查看特徵數與名稱', results_store
 
-    # 特徵變數和目標變數
-    X = df.drop(columns=['PRICE'])
-    y = df['PRICE']
-    
-    # 切分數據集
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # 標準化數據
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    
-    # 定義模型
-    if selected_model == 'linear':
-        model = LinearRegression()
-    elif selected_model == 'knn':
-        model = KNeighborsRegressor()
-    elif selected_model == 'knn_grid':
-        param_grid = {'n_neighbors': range(1, 31)}
-        model = GridSearchCV(KNeighborsRegressor(), param_grid, cv=5)
-    elif selected_model == 'decision_tree':
-        model = DecisionTreeRegressor(random_state=42)
-    elif selected_model == 'random_forest':
-        model = RandomForestRegressor(random_state=42)
-    else:
-        return no_update, no_update
+    # 當「查看結果」按鈕被點擊
+    if evaluate_clicks > 0:
+        # 若未選擇模型或未輸入閾值
+        if selected_model is None:
+            return '請先選擇模型並輸入閾值', '查看特徵數與名稱', results_store
+        if threshold is None:
+            return '請輸入閾值', '查看特徵數與名稱', results_store
 
-    # 訓練模型
-    model.fit(X_train_scaled, y_train)
-    
-    # 預測
-    y_pred = model.predict(X_test_scaled)
-    
-    # 評估模型
-    mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    correct_ratio = 0.0
-    
-    # 以0.51閾值篩選特徵
-    selected_features = X_train.columns[(X_train.corrwith(y_train).abs() > threshold)].tolist()
-    
-    # 更新結果表格
-    new_row = {'model': selected_model, 'mse': mse, 'r2': r2, 'correct_ratio': correct_ratio}
-    table_data.append(new_row)
-    
-    return f"模型: {selected_model}, MSE: {mse:.4f}, R-squared: {r2:.4f}, 正確比率: {correct_ratio:.4f}", table_data
+        # 根據選擇的模型進行評估
+        selected_features = df_clean.corr().loc[:, 'PRICE'].abs() > threshold
+        features = df_clean.columns[selected_features]
 
-# 啟動應用
+        X = df_clean[features].drop(columns=['PRICE']).dropna()
+        y = df_clean['PRICE'].loc[X.index]
+
+        if selected_model == 'linear-regression':
+            model = LinearRegression()
+            model_name = '線性回歸'
+        elif selected_model == 'knn':
+            model = KNeighborsRegressor()
+            model_name = 'K近鄰回歸模型'
+        elif selected_model == 'grid-search':
+            model = GridSearchCV(LinearRegression(), param_grid={'fit_intercept': [True, False]})
+            model_name = 'GridSearchCV'
+        elif selected_model == 'decision-tree':
+            model = DecisionTreeRegressor()
+            model_name = '決策樹'
+        elif selected_model == 'random-forest':
+            model = RandomForestRegressor()
+            model_name = '隨機森林'
+        else:
+            return '請選擇模型', '', results_store
+
+        model.fit(X, y)
+        y_pred = model.predict(X)
+        
+        mse = mean_squared_error(y, y_pred)
+        r2 = r2_score(y, y_pred)
+        accuracy = np.mean(np.abs((y - y_pred) / y) < 0.2)  # 計算20%容忍範圍內的正確比率
+
+        evaluation_result = f"顯示評估結果:\nR^2: {r2:.3f}\nMSE: {mse:.3f}\n容忍度: {accuracy:.3f}\n"
+        
+        selected_features_result = f"顯示特徵數: {len(features)}\n顯示特徵名稱: {', '.join(features)}\n"
+
+        evaluation_data = {'model': model_name, 'mse': mse, 'r_squared': r2, 'accuracy': accuracy}
+
+        # 將新結果添加到結果儲存中，並確保數據不超過8條
+        results_store.append(evaluation_data)
+        if len(results_store) > 8:
+            results_store.pop(0)
+
+        # 更新模型選擇儲存
+        selected_model_store = selected_model
+
+        return evaluation_result, selected_features_result, results_store
+
+    # 若沒有按鈕被點擊，返回預設提示信息
+    return '請選擇模型並輸入閾值', '查看特徵數與名稱', results_store
+
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server("localhost", 8050, debug=True)

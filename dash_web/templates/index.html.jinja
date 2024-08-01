@@ -1,0 +1,27 @@
+{% extends 'base.html.jinja' %}
+
+{% block title%}
+{{ super() }} - 首頁
+{% endblock %}
+
+{% block head%}
+{{ super() }}
+<style type"text/css">
+    body {
+        background-color: white;
+    }
+</style>
+{% endblock %}
+
+
+{% block main%}
+<h3 class="mt-5">資料集內容</h3>
+        <div class="table-responsive">
+            {{ table | safe }}
+        </div>
+        <h3 class="mt-5">敘述統計</h3>
+        <div class="table-responsive">
+            {{ desc | safe }}
+        </div>
+        <a href="{{ url_for('full_data') }}" class="btn btn-primary mt-3">查看所有內容</a>
+{% endblock %}

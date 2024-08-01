@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-tw">
+
+<head>
+    {% block head%}
+    {# 圖標文件 #}
+    {#
+    <link rel="icon" type="image/png" sizes="16x16"
+        href="{{ url_for('static_files', filename='favicon.io/favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32"
+        href="{{ url_for('static_files', filename='favicon.io/favicon-32x32.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static_files', filename='favicon.io/apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ url_for('static_files', filename='favicon.io/site.webmanifest') }}">
+    <link rel="icon" href="{{ url_for('static_files', filename='favicon.io/favicon.ico') }}" type="image/x-icon"> #}
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{url_for('static',filename='style/bootstrap.min.css')}}" rel="stylesheet">
+    <script src="{{url_for('static',filename='js/bootstrap.min.js')}}"></script>
+    <title>{% block title%}波士頓房價預測{% endblock%}</title>
+    <style>
+        .navbar-nav .nav-item {
+            margin-left: 20px;
+        }
+
+        .navbar-brand {
+            margin-right: 30px;
+        }
+    </style>
+    {% endblock %}
+</head>
+
+<body>
+    <div class="container-md">
+        <nav class="navbar navbar-expand-md bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{url_for('index')}}">波士頓房價預測</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <img src="{{url_for('static',filename='images/menu.png')}}" alt="Toggle navigation"
+                        style="width: 30px; height: 30px;">
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="navbar-brand" href="{{url_for('approach')}}">方法與流程</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="./dashboard/app2">說明</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">模型評分</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+        <main>
+            {% block main%}
+            {% endblock %}
+        </main>
+    </div>
+</body>
+
+</html>

@@ -25,71 +25,89 @@ df = pd.read_csv('train_dataset.csv')
 def remove_outliers(data):
     return data[(data - data.mean()).abs() < 3 * data.std()]
 
+# Clean all features by removing outliers
+df_cleaned = df.copy()
+for column in df.columns:
+    df_cleaned[column] = remove_outliers(df_cleaned[column])
+
 # Function to create figure for the given feature with various transformations
 def create_figure(feature, transformation):
     fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
-    # 移除離群值
-    data = df[feature].copy()
-    data = remove_outliers(data)
-
-    # 原始數據
-    sns.histplot(df[feature], kde=True, ax=axes[0])
-    axes[0].set_title(f'{feature} 分佈圖 (原始數據)')
-    axes[0].set_xlabel(feature)
-    axes[0].set_ylabel('Count')
-
-    # 根據選擇的修正方法處理數據
-    if transformation == '對數轉換':
-        if (data > 0).all():
-            transformed_data = np.log(data)
-            title = f'{feature} 分佈圖 (對數轉換)'
-            xlabel = f'Log({feature})'
-        else:
-            transformed_data = data
-            title = f'{feature} 分佈圖 (對數轉換)'
-            xlabel = '資料中包含非正數'
-    elif transformation == '平方根轉換':
-        if (data >= 0).all():
-            transformed_data = np.sqrt(data)
-            title = f'{feature} 分佈圖 (平方根轉換)'
-            xlabel = f'Sqrt({feature})'
-        else:
-            transformed_data = data
-            title = f'{feature} 分佈圖 (平方根轉換)'
-            xlabel = '資料中包含負數'
-    elif transformation == '立方根轉換':
-        transformed_data = np.cbrt(data)
-        title = f'{feature} 分佈圖 (立方根轉換)'
-        xlabel = f'Cbrt({feature})'
-    elif transformation == '次方轉換':
-        if data.skew() < 0:
-            power = 0.25
-            transformed_data = np.power(data, power)
-            title = f'{feature} 分佈圖 (次方轉換)'
-            xlabel = f'Power({feature}, {power})'
-        else:
-            transformed_data = data
-            title = f'{feature} 分佈圖 (次方轉換)'
-            xlabel = '資料無左偏'
-    elif transformation == 'Box-Cox 轉換':
-        if (data > 0).all():
-            transformed_data, _ = stats.boxcox(data)
-            title = f'{feature} 分佈圖 (Box-Cox 轉換)'
-            xlabel = f'Box-Cox({feature})'
-        else:
-            transformed_data = data
-            title = f'{feature} 分佈圖 (Box-Cox 轉換)'
-            xlabel = '資料中包含非正數'
+    if feature == 'CHAS':
+        # 顯示 CHAS 的頻率分佈圖
+        sns.countplot(x=feature, data=df, ax=axes[0])
+        axes[0].set_title(f'{feature} 頻率分佈圖')
+        axes[0].set_xlabel(feature)
+        axes[0].set_ylabel('Count')
+        
+        # 顯示原始數據分佈
+        sns.histplot(df[feature], kde=True, ax=axes[1])
+        axes[1].set_title(f'{feature} 分佈圖 (原始數據)')
+        axes[1].set_xlabel(feature)
+        axes[1].set_ylabel('Count')
     else:
-        transformed_data = data
-        title = '未選擇修正方法'
-        xlabel = '選擇修正方法'
+        # 移除離群值
+        data = df[feature].copy()
+        data = remove_outliers(data)
 
-    sns.histplot(transformed_data, kde=True, ax=axes[1])
-    axes[1].set_title(title)
-    axes[1].set_xlabel(xlabel)
-    axes[1].set_ylabel('Count')
+        # 原始數據
+        sns.histplot(df[feature], kde=True, ax=axes[0])
+        axes[0].set_title(f'{feature} 分佈圖 (原始數據)')
+        axes[0].set_xlabel(feature)
+        axes[0].set_ylabel('Count')
+
+        # 根據選擇的修正方法處理數據
+        if transformation == '對數轉換':
+            if (data > 0).all():
+                transformed_data = np.log(data)
+                title = f'{feature} 分佈圖 (對數轉換)'
+                xlabel = f'Log({feature})'
+            else:
+                transformed_data = data
+                title = f'{feature} 分佈圖 (對數轉換)'
+                xlabel = '資料中包含非正數'
+        elif transformation == '平方根轉換':
+            if (data >= 0).all():
+                transformed_data = np.sqrt(data)
+                title = f'{feature} 分佈圖 (平方根轉換)'
+                xlabel = f'Sqrt({feature})'
+            else:
+                transformed_data = data
+                title = f'{feature} 分佈圖 (平方根轉換)'
+                xlabel = '資料中包含負數'
+        elif transformation == '立方根轉換':
+            transformed_data = np.cbrt(data)
+            title = f'{feature} 分佈圖 (立方根轉換)'
+            xlabel = f'Cbrt({feature})'
+        elif transformation == '次方轉換':
+            if data.skew() < 0:
+                power = 0.25
+                transformed_data = np.power(data, power)
+                title = f'{feature} 分佈圖 (次方轉換)'
+                xlabel = f'Power({feature}, {power})'
+            else:
+                transformed_data = data
+                title = f'{feature} 分佈圖 (次方轉換)'
+                xlabel = '資料無左偏'
+        elif transformation == 'Box-Cox 轉換':
+            if (data > 0).all():
+                transformed_data, _ = stats.boxcox(data)
+                title = f'{feature} 分佈圖 (Box-Cox 轉換)'
+                xlabel = f'Box-Cox({feature})'
+            else:
+                transformed_data = data
+                title = f'{feature} 分佈圖 (Box-Cox 轉換)'
+                xlabel = '資料中包含非正數'
+        else:
+            transformed_data = data
+            title = '未選擇修正方法'
+            xlabel = '選擇修正方法'
+
+        sns.histplot(transformed_data, kde=True, ax=axes[1])
+        axes[1].set_title(title)
+        axes[1].set_xlabel(xlabel)
+        axes[1].set_ylabel('Count')
 
     # Save the figure to a bytes buffer
     buf = io.BytesIO()
@@ -123,8 +141,8 @@ app.layout = dbc.Container([
                 children=[
                     dash_table.DataTable(
                         id='data-describe',
-                        columns=[{'name': i, 'id': i} for i in df.describe().columns] + [{'name': '新欄位', 'id': 'new_column'}],
-                        data=[{**row, 'new_column': 0} for row in df.describe().reset_index().to_dict('records')],
+                        columns=[{'name': '統計量', 'id': 'statistics'}] + [{'name': i, 'id': i} for i in df_cleaned.describe().columns],
+                        data=[{'statistics': stat, **row} for stat, row in zip(['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max'], df_cleaned.describe().reset_index().to_dict('records'))],
                         style_table={'overflowX': 'auto'},
                         style_cell={'textAlign': 'left', 'minWidth': '100px', 'width': '150px', 'maxWidth': '200px'}
                     )

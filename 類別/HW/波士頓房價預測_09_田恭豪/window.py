@@ -409,7 +409,7 @@ class MyWindow(tk.Tk):
                     dec_score = dec_tree.score(X_test, y_test)
                     if dec_score > max_dec_accuracy:
                         max_dec_accuracy = dec_score
-                        correct_within_tolerance_dec = calculate_correct_within_tolerance(tolerance_percentage, dec_pred, y_test)
+                        correct_within_tolerance_dec = calculate_correct_within_tolerance(tolerance_percentage, dec_pred, y_test) # 預設值dec_pred,與測試值y_test做比較，得出使用模型的準確率
                         mse_dec = mean_squared_error(y_test, dec_pred)
                         r2_dec = r2_score(y_test, dec_pred)
 

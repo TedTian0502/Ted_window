@@ -1,5 +1,9 @@
 ## dash_flask_web
 ### 機器學習流程
+
+[image](./static/images/圖片1.png)
+
+
 我的機器學習專案流程分成7個步驟，以下為上述圖片內容的步驟說明:  
 1.收集資料，彙整為資料集(Dataset)。來自於原先在Scikit-Learn的Bostion Housing Dataset(現在已經下架)的train_dataset(訓練集)。  
 

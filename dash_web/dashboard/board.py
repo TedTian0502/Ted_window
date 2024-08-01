@@ -1,5 +1,5 @@
 import dash
-from dash import Dash, dcc, html, dash_table
+from dash import dcc, html, dash_table
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -10,19 +10,24 @@ import base64
 import matplotlib
 from scipy import stats
 import numpy as np
+import os
 
-app1 = Dash(__name__,requests_pathname_prefix='/dashboard/app1/')
-app1.title = '特徵數據'
-
-# 設置 matplotlib 使用的字型，選擇支持中文的字型
-matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']  # 或其他支持中文的字型
-matplotlib.rcParams['axes.unicode_minus'] = False  # 顯示負號
-
-# 使用 'Agg' 後端
+# 使用 'Agg' 後端來處理圖片渲染
 matplotlib.use('Agg')
 
-# Load the dataset from CSV
-df = pd.read_csv('../train_dataset.csv')
+app1 = dash.Dash(__name__, requests_pathname_prefix='/app1/', external_stylesheets=[dbc.themes.BOOTSTRAP])
+app1.title = '特徵數據'
+
+# 設定資料集檔案的絕對路徑
+absolute_path = os.path.join(os.getcwd(), 'train_dataset.csv')
+
+# 檢查檔案是否存在
+if os.path.exists(absolute_path):
+    print("檔案存在")
+    df = pd.read_csv(absolute_path)
+else:
+    print("檔案不存在")
+    df = None
 
 # Function to remove outliers
 def remove_outliers(data):
@@ -38,29 +43,24 @@ def create_figure(feature, transformation):
     fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
     if feature == 'CHAS':
-        # 顯示 CHAS 的頻率分佈圖
         sns.countplot(x=feature, data=df, ax=axes[0])
         axes[0].set_title(f'{feature} 頻率分佈圖')
         axes[0].set_xlabel(feature)
         axes[0].set_ylabel('Count')
         
-        # 顯示原始數據分佈
         sns.histplot(df[feature], kde=True, ax=axes[1])
         axes[1].set_title(f'{feature} 分佈圖 (原始數據)')
         axes[1].set_xlabel(feature)
         axes[1].set_ylabel('Count')
     else:
-        # 移除離群值
         data = df[feature].copy()
         data = remove_outliers(data)
 
-        # 原始數據
         sns.histplot(df[feature], kde=True, ax=axes[0])
         axes[0].set_title(f'{feature} 分佈圖 (原始數據)')
         axes[0].set_xlabel(feature)
         axes[0].set_ylabel('Count')
 
-        # 根據選擇的修正方法處理數據
         if transformation == '對數轉換':
             if (data > 0).all():
                 transformed_data = np.log(data)
@@ -112,39 +112,30 @@ def create_figure(feature, transformation):
         axes[1].set_xlabel(xlabel)
         axes[1].set_ylabel('Count')
 
-    # Save the figure to a bytes buffer
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     plt.close(fig)
     buf.seek(0)
     return buf
 
-# Function to convert image buffer to base64
 def encode_image(buf):
     encoded = base64.b64encode(buf.read()).decode('ascii')
-    buf.close()  # 確保在使用後關閉緩衝區
+    buf.close()
     return encoded
-
-# Initialize Dash app
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Define the layout of the app
 app1.layout = dbc.Container([
     dbc.Row([
         dbc.Col(html.H1("特徵常態分佈圖"), width=12),
-    ], style={'textAlign': 'center',
-              'backgroundColor': '#f8f9fa',
-              'padding': '20px'
-              }),  # 居中顯示標題
+    ], style={'textAlign': 'center', 'backgroundColor': '#f8f9fa', 'padding': '20px'}),
 
     dbc.Row([
         dbc.Col(
             html.Button("查看資料分布狀況", id="collapse-button", n_clicks=0),
-            width={'size': 6},  # 設置寬度
-            style={'textAlign': 'center',
-                   'padding': '10px'}  # 確保按鈕在其容器內居中
+            width={'size': 6},
+            style={'textAlign': 'center', 'padding': '10px'}
         )
-    ], style={'display': 'flex', 'justify-content': 'center'}),  # 使用 flexbox 來居中按鈕
+    ], style={'display': 'flex', 'justify-content': 'center'}),
 
     dbc.Row([
         dbc.Col(
@@ -176,7 +167,7 @@ app1.layout = dbc.Container([
                 ),
             ]),
             width=4,
-            style={'textAlign': 'center'}  # 將選單在其容器內居中
+            style={'textAlign': 'center'}
         ),
         dbc.Col(
             html.Div([
@@ -194,17 +185,15 @@ app1.layout = dbc.Container([
                 ),
             ]),
             width=4,
-            style={'textAlign': 'center'}  # 將選單在其容器內居中
+            style={'textAlign': 'center'}
         )
-    ], style={'display': 'flex', 'justify-content': 'center'}),  # 使用 flexbox 來居中選單和修正方法
+    ], style={'display': 'flex', 'justify-content': 'center'}),
 
     dbc.Row([
         dbc.Col(html.Img(id='feature-image'), width=12)
     ])
-], fluid=True)  # 確保容器填滿整個可見區域
+], fluid=True)
 
-
-# Callback to update image based on selected feature and transformation
 @app1.callback(
     Output('feature-image', 'src'),
     [Input('feature-dropdown', 'value'),
@@ -217,9 +206,8 @@ def update_image(selected_feature, selected_transformation):
         return 'data:image/png;base64,{}'.format(encoded_image)
     except Exception as e:
         print(f"Error: {e}")
-        return "data:image/png;base64,"  # 返回空圖像以顯示錯誤
+        return "data:image/png;base64,"
 
-# Callback to toggle collapse
 @app1.callback(
     Output('collapse', 'is_open'),
     [Input('collapse-button', 'n_clicks')],
@@ -229,7 +217,3 @@ def toggle_collapse(n_clicks, is_open):
     if n_clicks:
         return not is_open
     return is_open
-
-# Run the app
-# if __name__ == "__main__":
-#     app.run_server("localhost", 8060, debug=True)

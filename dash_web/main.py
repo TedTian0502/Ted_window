@@ -12,10 +12,10 @@ from dashboard.board import app1  # 引入第一個 Dash 應用程式
 from dashboard.board1 import app2  # 引入第二個 Dash 應用程式
 
 # 創建 Flask 應用程式實例
-server = Flask(__name__)
+application = Flask(__name__)
 
 # 創建主 Dash 應用程式
-app = dash.Dash(__name__, server=server, suppress_callback_exceptions=True)
+app = dash.Dash(__name__, server=application, suppress_callback_exceptions=True)
 
 # 定義 Dash 應用程式的佈局
 app.layout = html.Div([
@@ -41,7 +41,7 @@ def render_page(tab_name):
         return dcc.Location(pathname='/app2', id='app2')
 
 # 使用 DispatcherMiddleware 將 Dash 應用程式和 Flask 應用程式結合在一起
-app_server = DispatcherMiddleware(server, {
+app_server = DispatcherMiddleware(application, {
     '/app1': app1.server,
     '/app2': app2.server
 })
@@ -58,15 +58,15 @@ else:
     df = None
 
 # 使用 Flask 定義路由
-@server.route("/")
+@application.route("/")
 def index():
     return render_template("index.html.jinja")
 
-@server.route("/approach")
+@application.route("/approach")
 def approach():
     return render_template("approach.html.jinja")
 
-@server.route('/full_data')
+@application.route('/full_data')
 def full_data():
     df_html = df.to_html(classes='table table-striped')
     return render_template('full_data.html.jinja', table=df_html)

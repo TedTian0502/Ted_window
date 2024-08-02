@@ -11,13 +11,29 @@
 ### 視窗介面
 
 ### 1.初始畫面
-![picture_1](./images/window_1.png)
+![picture_1](./static/images/介面1.png)
+
+### 2.特徵數據
+![picture_2](./static/images/介面2.png)
+
+### 3.選單查看敘述統計
+![picture_3](./static/images/介面3.png)
+
+### 4.選擇不同的離群值修正方法
+![picture_4](./static/images/介面4.png)
+
+### 5.模型評估介面
+![picture_5](./static/images/介面5.png)
+
+### 6.選擇模型種類
+![picture_6](./static/images/介面6.png)
+
+### 7.紀錄數據
+![picture_7](./static/images/介面7.png)
 
 
 
-
-
-### 補充說明
+### 補充說明:
 我的機器學習專案流程分成7個步驟，以下為上述圖片內容的步驟說明:  
 1.收集資料，彙整為資料集(Dataset)。來自於原先在Scikit-Learn的Bostion Housing Dataset(現在已經下架)的train_dataset(訓練集)。  
 

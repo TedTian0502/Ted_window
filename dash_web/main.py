@@ -15,7 +15,7 @@ from dashboard.board1 import app2  # 引入第二個 Dash 應用程式
 application = Flask(__name__)
 
 # 創建主 Dash 應用程式
-app = dash.Dash(__name__, server=application, suppress_callback_exceptions=True)
+app = dash.Dash(__name__, server=application,suppress_callback_exceptions=True)
 
 # 定義 Dash 應用程式的佈局
 app.layout = html.Div([
@@ -23,8 +23,7 @@ app.layout = html.Div([
         dcc.Tab(label='應用程式 1', value='app1'),
         dcc.Tab(label='應用程式 2', value='app2'),
     ],
-    id='tabs',
-    value='app1'
+    id='tabs'
     ),
     html.Div(id='tabs-content')
 ])

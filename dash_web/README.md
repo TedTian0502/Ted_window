@@ -1,9 +1,23 @@
-## dash_flask_web
-### 機器學習流程
+## 波士頓房價預測 dash_flask_web
 
-[image](./static/images/圖片1.png)
+### 資料來源:
+原先在Scikit-Learn的Bostion Housing Dataset(現在已經下架)的train_dataset(訓練集)。
+
+### 專案目的: 
+以波士頓房價訓練集，體驗監督式學習的分類法，將資料區分為測試和訓練的資料堆，從訓練的資料中定義特徵變數的欄位作為x，房價欄位作為y，找出x和y之間的關係，並把這個關係用測試的資料做驗證，評估模型分數得出預測房價最符合的模型。
 
 
+
+### 視窗介面
+
+### 1.初始畫面
+![picture_1](./images/window_1.png)
+
+
+
+
+
+### 補充說明
 我的機器學習專案流程分成7個步驟，以下為上述圖片內容的步驟說明:  
 1.收集資料，彙整為資料集(Dataset)。來自於原先在Scikit-Learn的Bostion Housing Dataset(現在已經下架)的train_dataset(訓練集)。  
 

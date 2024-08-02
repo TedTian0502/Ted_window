@@ -15,7 +15,7 @@ from dashboard.board1 import app2  # 引入第二個 Dash 應用程式
 application = Flask(__name__)
 
 # 創建主 Dash 應用程式
-app = dash.Dash(__name__, server=application,suppress_callback_exceptions=True)
+app = dash.Dash(__name__, server=application, suppress_callback_exceptions=True)
 
 # 定義 Dash 應用程式的佈局
 app.layout = html.Div([
@@ -25,7 +25,15 @@ app.layout = html.Div([
     ],
     id='tabs'
     ),
-    html.Div(id='tabs-content')
+    html.Div(id='tabs-content'),
+    html.Div([
+        html.Div([
+            html.Img(src='/static/images/圖片2.jpg', style={'width': '50%', 'display': 'block', 'margin-left': 'auto', 'margin-right': 'auto'}),
+            html.H3('歡迎來到波士頓房價預測應用', style={'text-align': 'center'}),
+            html.P('這是一個預測房價的使用模型評估，使用波士頓房價數據集來展示如何應用各種機器學習模型進行預測。', style={'text-align': 'center'}),
+            html.P('在這裡，你將能夠探索數據、訓練模型並評估最符合的模型結果。', style={'text-align': 'center'})
+        ], style={'text-align': 'center'})
+    ])
 ])
 
 # 定義回調函數來切換應用程式頁面
@@ -35,9 +43,13 @@ app.layout = html.Div([
 )
 def render_page(tab_name):
     if tab_name == 'app1':
-        return dcc.Location(pathname='/app1', id='app1')
+        return html.Div([
+            dcc.Location(pathname='/app1', id='app1')
+        ])
     elif tab_name == 'app2':
-        return dcc.Location(pathname='/app2', id='app2')
+        return html.Div([
+            dcc.Location(pathname='/app2', id='app2')
+        ])
 
 # 使用 DispatcherMiddleware 將 Dash 應用程式和 Flask 應用程式結合在一起
 app_server = DispatcherMiddleware(application, {
@@ -56,20 +68,6 @@ else:
     print("檔案不存在")
     df = None
 
-# 使用 Flask 定義路由
-@application.route("/")
-def index():
-    return render_template("index.html.jinja")
-
-@application.route("/approach")
-def approach():
-    return render_template("approach.html.jinja")
-
-@application.route('/full_data')
-def full_data():
-    df_html = df.to_html(classes='table table-striped')
-    return render_template('full_data.html.jinja', table=df_html)
 
 if __name__ == '__main__':
-    # 啟動伺服器
     run_simple('localhost', 8050, app_server, use_reloader=True, use_debugger=True)

@@ -79,7 +79,7 @@ app2.layout = dbc.Container([
                     {'label': '隨機森林(random-forest)', 'value': 'random-forest'}
                 ],
                 placeholder='請選擇模型'
-            ), width=4, style={'margin': '5px 100px 10px 0'}),
+            ), width=20, style={'margin': '5px 100px 10px 0','width': '20%'}),
             dbc.Col(dcc.Input(id='threshold-input', type='number', min=0, max=0.99, step=0.01, disabled=True), width=2, style={'margin-bottom': '10px'}),
             dbc.Col(dbc.Button("查看結果", id='evaluate-button', n_clicks=0), width=4, style={'margin': '0 0 10px 10px'}),
         ],

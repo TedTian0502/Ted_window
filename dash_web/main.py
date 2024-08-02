@@ -20,8 +20,8 @@ app = dash.Dash(__name__, server=application,suppress_callback_exceptions=True)
 # 定義 Dash 應用程式的佈局
 app.layout = html.Div([
     dcc.Tabs([
-        dcc.Tab(label='應用程式 1', value='app1'),
-        dcc.Tab(label='應用程式 2', value='app2'),
+        dcc.Tab(label='特徵數據', value='app1'),
+        dcc.Tab(label='模型評估', value='app2'),
     ],
     id='tabs'
     ),
